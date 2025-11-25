@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>个股公告新闻信息</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --primary-dark: #0d7ae6;
+            --secondary-color: #f0f8ff;
+            --border-color: #e8e8e8;
+            --text-color: #333;
+            --light-text: #666;
+            --background: #f5f7fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            line-height: 1.5;
+            font-size: 14px;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .header h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .filter-container {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .filter-group label {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .filter-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background-color: #fff;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 2;
+        }
+        
+        .search-box input {
+            padding-left: 40px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--light-text);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: var(--text-color);
+        }
+        
+        .table-container {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .table-responsive {
+            max-height: 60vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            padding: 12px 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        tbody td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.85rem;
+        }
+        
+        .stock-name {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .news-title {
+            color: var(--text-color);
+            line-height: 1.4;
+        }
+        
+        .news-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: var(--secondary-color);
+        }
+        
+        .date-time {
+            color: var(--light-text);
+            font-size: 0.8rem;
+        }
+        
+        .footer {
+            text-align: center;
+            color: var(--light-text);
+            font-size: 0.8rem;
+            padding: 10px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: var(--light-text);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--light-text);
+        }
+        
+        @media (max-width: 480px) {
+            .filter-row {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>个股公告新闻信息</h1>
+            <p>实时更新，专业筛选，投资决策好帮手</p>
+        </div>
+        
+        <div class="filter-container">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>日期筛选</label>
+                    <select id="dateFilter" class="filter-control">
+                        <option value="all">全部日期</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>股票筛选</label>
+                    <select id="stockFilter" class="filter-control">
+                        <option value="all">全部股票</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filter-row">
+                <div class="search-box">
+                    <label>关键词搜索</label>
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchFilter" class="filter-control" placeholder="输入关键词搜索公告主题...">
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn btn-primary" id="refreshBtn">刷新数据</button>
+                <button class="btn btn-secondary" id="resetBtn">重置筛选</button>
+            </div>
+            
+            <div class="stats">
+                <span id="totalCount">共 0 条公告</span>
+                <span id="filteredCount">显示 0 条</span>
+                <span id="updateTime">最后更新: --</span>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">日期</th>
+                            <th width="10%">时间</th>
+                            <th width="15%">股票名称</th>
+                            <th width="50%">公告主题</th>
+                            <th width="10%">详情</th>
+                        </tr>
+                    </thead>
+                    <tbody id="newsTable">
+                        <!-- 数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>数据来源: 同花顺 | 建议将本页添加到微信收藏</p>
+        </div>
+    </div>
+
+    <script>
+        // 原始数据
+        const newsData = [
+            { date: "2025-11-23 00:00:00", time: "00:02:00", name: "烽火通信", title: "烽火通信：烽火通信科技股份有限公司关于\"烽火转债\"到期兑付暨摘牌的公告", link: "http://news.10jqka.com.cn/field/sn/20251124/55007869.shtml" },
+            { date: "2025-11-23 00:00:00", time: "00:04:00", name: "烽火通信", title: "烽火通信：烽火通信科技股份有限公司关于股份回购进展公告", link: "http://news.10jqka.com.cn/field/sn/20251124/55007851.shtml" },
+            { date: "2025-11-23 00:00:00", time: "13:21:00", name: "胜宏科技", title: "高成长+高回撤+高ROE的优质科技股曝光", link: "http://news.10jqka.com.cn/20251123/c672674066.shtml" },
+            { date: "2025-11-23 00:00:00", time: "13:21:00", name: "生益科技", title: "高成长+高回撤+高ROE的优质科技股曝光", link: "http://news.10jqka.com.cn/20251123/c672674066.shtml" },
+            { date: "2025-11-23 00:00:00", time: "10:03:00", name: "视觉中国", title: "被摄影师起诉侵权，视觉中国公开致歉：涉案作品已下架！\"系签约供稿人违规上传，已永久封禁其账号\"", link: "http://news.10jqka.com.cn/20251123/c672673588.shtml" },
+            { date: "2025-11-23 00:00:00", time: "07:11:00", name: "视觉中国", title: "视觉中国致歉：侵权涉案作品已于诉讼发生后在网站下架 侵权行为终止", link: "http://news.10jqka.com.cn/20251123/c672673102.shtml" },
+            { date: "2025-11-23 00:00:00", time: "13:21:00", name: "深南电路", title: "高成长+高回撤+高ROE的优质科技股曝光", link: "http://news.10jqka.com.cn/20251123/c672674066.shtml" },
+            { date: "2025-11-23 00:00:00", time: "08:48:00", name: "光迅科技", title: "601238，重大利好！卫星通信产业拐点在即，机构扎堆看好15只概念股", link: "http://news.10jqka.com.cn/20251123/c672673347.shtml" },
+            { date: "2025-11-23 00:00:00", time: "21:36:00", name: "胜宏科技", title: "10月以来，高毅多次调研这三家公司", link: "http://news.10jqka.com.cn/20251123/c672675297.shtml" },
+            { date: "2025-11-23 00:00:00", time: "21:54:00", name: "中际旭创", title: "中际旭创：公司国内市场收入占公司总的营收比重为13.19%", link: "http://news.10jqka.com.cn/20251123/c672675355.shtml" },
+            { date: "2025-11-24 00:00:00", time: "05:32:00", name: "烽火通信", title: "回购增持\"进度条\"频频刷新 上市公司纷纷出手稳预期", link: "http://news.10jqka.com.cn/20251124/c672676019.shtml" },
+            { date: "2025-11-24 00:00:00", time: "06:57:00", name: "烽火通信", title: "烽火通信以纤缆技术创新擘画智能时代新蓝图", link: "http://news.10jqka.com.cn/20251124/c672676423.shtml" },
+            { date: "2025-11-24 00:00:00", time: "06:58:00", name: "沪电股份", title: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
+            { date: "2025-11-24 00:00:00", time: "07:00:00", name: "视觉中国", title: "券商观点|计算机行业周报：Google引领全球AI产业前进", link: "http://news.10jqka.com.cn/20251124/c672676458.shtml" },
+            { date: "2025-11-24 00:00:00", time: "09:05:00", name: "中文在线", title: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
+            { date: "2025-11-24 00:00:00", time: "07:00:00", name: "中文在线", title: "券商观点|计算机行业周报：Google引领全球AI产业前进", link: "http://news.10jqka.com.cn/20251124/c672676458.shtml" },
+            { date: "2025-11-24 00:00:00", time: "08:50:00", name: "圣邦股份", title: "以高可靠芯片，护航汽车安全：圣邦微电子荣获IATF 16949:2016符合证明函", link: "http://news.10jqka.com.cn/20251124/c672678039.shtml" },
+            { date: "2025-11-24 00:00:00", time: "05:32:00", name: "汇顶科技", title: "回购增持\"进度条\"频频刷新 上市公司纷纷出手稳预期", link: "http://news.10jqka.com.cn/20251124/c672676019.shtml" },
+            { date: "2025-11-24 00:00:00", time: "07:07:00", name: "兆易创新", title: "券商观点|电子行业周报：NV业绩强劲、谷歌发布Gemini3，算力景气度持续验证", link: "http://news.10jqka.com.cn/20251124/c672676560.shtml" },
+            { date: "2025-11-24 00:00:00", time: "07:08:00", name: "天孚通信", title: "券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力", link: "http://news.10jqka.com.cn/20251124/c672676568.shtml" },
+            { date: "2025-11-24 00:00:00", time: "08:00:00", name: "中际旭创", title: "最新！订单爆棚的公司名单来了，12家获机构扎堆关注", link: "http://news.10jqka.com.cn/20251124/c672676937.shtml" },
+            { date: "2025-11-24 00:00:00", time: "06:58:00", name: "润建股份", title: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
+            { date: "2025-11-24 00:00:00", time: "06:58:00", name: "润建股份", title: "校企协同！润建股份加速产学研合作，共绘中国-东盟AI农业新蓝图", link: "http://news.10jqka.com.cn/20251124/c672676430.shtml" },
+            { date: "2025-11-24 00:00:00", time: "06:58:00", name: "润泽科技", title: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
+            { date: "2025-11-24 00:00:00", time: "07:08:00", name: "光环新网", title: "券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力", link: "http://news.10jqka.com.cn/20251124/c672676568.shtml" },
+            { date: "2025-11-24 00:00:00", time: "06:58:00", name: "光环新网", title: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
+            { date: "2025-11-24 00:00:00", time: "07:08:00", name: "奥飞数据", title: "券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力", link: "http://news.10jqka.com.cn/20251124/c672676568.shtml" },
+            { date: "2025-11-24 00:00:00", time: "06:58:00", name: "奥飞数据", title: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
+            { date: "2025-11-24 00:00:00", time: "07:00:00", name: "数据港", title: "券商观点|计算机行业周报：Google引领全球AI产业前进", link: "http://news.10jqka.com.cn/20251124/c672676458.shtml" },
+            { date: "2025-11-24 00:00:00", time: "08:48:00", name: "兆易创新", title: "2025年11月24日早间个股预警：安达智能股东易指通拟减持不超2.74%股份等", link: "http://news.10jqka.com.cn/20251124/c672677983.shtml" },
+            { date: "2025-11-24 00:00:00", time: "09:05:00", name: "胜宏科技", title: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
+            { date: "2025-11-24 00:00:00", time: "09:05:00", name: "东山精密", title: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
+            { date: "2025-11-24 00:00:00", time: "08:41:00", name: "中兴通讯", title: "上市公司纷纷抢位6G 诸多瓶颈待破", link: "http://news.10jqka.com.cn/20251124/c672677832.shtml" },
+            { date: "2025-11-24 00:00:00", time: "09:05:00", name: "兆易创新", title: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
+            { date: "2025-11-24 00:00:00", time: "09:05:00", name: "中际旭创", title: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
+            { date: "2025-11-24 00:00:00", time: "09:05:00", name: "新易盛", title: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
+            { date: "2025-11-24 00:00:00", time: "09:05:00", name: "赛微电子", title: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
+            { date: "2025-11-24 00:00:00", time: "08:52:00", name: "长川科技", title: "今日盘后生效，MSCI中国指数新纳26股！", link: "http://news.10jqka.com.cn/20251124/c672678066.shtml" },
+            { date: "2025-11-25 00:00:00", time: "08:52:00", name: "视觉中国", title: "算力之后，AI的价值洼地轮到谁了？", link: "http://news.10jqka.com.cn/20251125/c672708172.shtml" },
+            { date: "2025-11-25 00:00:00", time: "05:47:00", name: "视觉中国", title: "阿里千问引爆下载热潮 资金涌入AI应用板块", link: "http://news.10jqka.com.cn/20251125/c672705264.shtml" },
+            { date: "2025-11-25 00:00:00", time: "07:24:00", name: "汇顶科技", title: "多家上市公司回购增持刷新进度", link: "http://news.10jqka.com.cn/20251125/c672706427.shtml" },
+            { date: "2025-11-25 00:00:00", time: "00:04:00", name: "汇顶科技", title: "汇顶科技：关于以集中竞价交易方式首次回购公司股份的公告", link: "http://news.10jqka.com.cn/field/sn/20251125/55013937.shtml" },
+            { date: "2025-11-25 00:00:00", time: "06:21:00", name: "豪威集团", title: "新管理层助力豪威进一步提升运营效率", link: "http://news.10jqka.com.cn/field/sr/20251125/55025263.shtml" },
+            { date: "2025-11-25 00:00:00", time: "05:47:00", name: "中贝通信", title: "中贝通信李六兵：19亿元定增锚定AI未来", link: "http://news.10jqka.com.cn/20251125/c672705275.shtml" },
+            { date: "2025-11-25 00:00:00", time: "05:47:00", name: "数据港", title: "阿里千问引爆下载热潮 资金涌入AI应用板块", link: "http://news.10jqka.com.cn/20251125/c672705264.shtml" },
+            { date: "2025-11-25 00:00:00", time: "00:02:00", name: "中际旭创", title: "中际旭创：关于部分高级管理人员减持计划期限届满暨实施情况公告", link: "http://news.10jqka.com.cn/field/sn/20251125/55021559.shtml" },
+            { date: "2025-11-25 00:00:00", time: "08:09:00", name: "天孚通信", title: "天孚通信：光模块厂商是公司的主要客户", link: "http://news.10jqka.com.cn/20251125/c672707098.shtml" },
+            { date: "2025-11-25 00:00:00", time: "00:30:00", name: "天孚通信", title: "天孚通信（截止2025年11月20日）股东人数为141530户 环比增加10.55%", link: "http://news.10jqka.com.cn/20251125/c672704663.shtml" },
+            { date: "2025-11-25 00:00:00", time: "08:19:00", name: "光迅科技", title: "光迅科技：向特定对象发行股票申请获深交所受理", link: "http://news.10jqka.com.cn/20251125/c672707501.shtml" },
+            { date: "2025-11-25 00:00:00", time: "00:02:00", name: "光迅科技", title: "光迅科技：武汉光迅科技股份有限公司2025年度向特定对象发行股票募集说明书（申报稿）", link: "http://news.10jqka.com.cn/field/sn/20251125/55025141.shtml" },
+            { date: "2025-11-25 00:00:00", time: "00:00:00", name: "光迅科技", title: "光迅科技：武汉光迅科技股份有限公司最近一年的财务报告及其审计报告以及最近一期的财务报告", link: "http://news.10jqka.com.cn/field/sn/20251125/55025143.shtml" },
+            { date: "2025-11-25 00:00:00", time: "00:00:00", name: "光迅科技", title: "光迅科技：北京市嘉源律师事务所关于武汉光迅科技股份有限公司2025年度向特定对象发行股票的法律意见书", link: "http://news.10jqka.com.cn/field/sn/20251125/55025139.shtml" },
+            { date: "2025-11-25 00:00:00", time: "00:00:00", name: "光迅科技", title: "光迅科技：申万宏源证券承销保荐有限责任公司关于武汉光迅科技股份有限公司向特定对象发行股票并在主板上市之发行保荐书", link: "http://news.10jqka.com.cn/field/sn/20251125/55025137.shtml" },
+            { date: "2025-11-25 00:00:00", time: "07:24:00", name: "烽火通信", title: "多家上市公司回购增持刷新进度", link: "http://news.10jqka.com.cn/20251125/c672706427.shtml" },
+            { date: "2025-11-25 00:00:00", time: "08:52:00", name: "昆仑万维", title: "算力之后，AI的价值洼地轮到谁了？", link: "http://news.10jqka.com.cn/20251125/c672708172.shtml" },
+            { date: "2025-11-25 00:00:00", time: "05:47:00", name: "昆仑万维", title: "阿里千问引爆下载热潮 资金涌入AI应用板块", link: "http://news.10jqka.com.cn/20251125/c672705264.shtml" },
+            { date: "2025-11-25 00:00:00", time: "08:52:00", name: "吉比特", title: "算力之后，AI的价值洼地轮到谁了？", link: "http://news.10jqka.com.cn/20251125/c672708172.shtml" }
+        ];
+
+        // 应用状态
+        let state = {
+            filteredData: [],
+            dateFilter: 'all',
+            stockFilter: 'all',
+            searchFilter: ''
+        };
+
+        // 初始化筛选器选项
+        function initFilters() {
+            const dateSet = new Set();
+            const stockSet = new Set();
+            
+            newsData.forEach(item => {
+                // 提取日期部分
+                const dateOnly = item.date.split(' ')[0];
+                dateSet.add(dateOnly);
+                stockSet.add(item.name);
+            });
+            
+            // 填充日期筛选器
+            const dateFilter = document.getElementById('dateFilter');
+            Array.from(dateSet).sort().reverse().forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = date;
+                dateFilter.appendChild(option);
+            });
+            
+            // 填充股票筛选器
+            const stockFilter = document.getElementById('stockFilter');
+            Array.from(stockSet).sort().forEach(stock => {
+                const option = document.createElement('option');
+                option.value = stock;
+                option.textContent = stock;
+                stockFilter.appendChild(option);
+            });
+            
+            // 更新统计数据
+            document.getElementById('totalCount').textContent = `共 ${newsData.length} 条公告`;
+        }
+
+        // 应用筛选和排序
+        function applyFiltersAndSort() {
+            let filtered = [...newsData];
+            
+            // 日期筛选
+            if (state.dateFilter !== 'all') {
+                filtered = filtered.filter(item => item.date.startsWith(state.dateFilter));
+            }
+            
+            // 股票筛选
+            if (state.stockFilter !== 'all') {
+                filtered = filtered.filter(item => item.name === state.stockFilter);
+            }
+            
+            // 关键词搜索
+            if (state.searchFilter) {
+                const searchTerm = state.searchFilter.toLowerCase();
+                filtered = filtered.filter(item => 
+                    item.title.toLowerCase().includes(searchTerm) || 
+                    item.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // 按日期和时间排序（最新的在前）
+            filtered.sort((a, b) => {
+                const dateCompare = b.date.localeCompare(a.date);
+                if (dateCompare !== 0) return dateCompare;
+                return b.time.localeCompare(a.time);
+            });
+            
+            state.filteredData = filtered;
+            renderTable();
+            
+            // 更新筛选后统计
+            document.getElementById('filteredCount').textContent = `显示 ${filtered.length} 条`;
+            document.getElementById('updateTime').textContent = `最后更新: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // 渲染表格
+        function renderTable() {
+            const tableBody = document.getElementById('newsTable');
+            
+            if (state.filteredData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="no-results">
+                            <p>没有找到匹配的公告信息</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            
+            state.filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // 提取日期部分（去掉时间）
+                const dateOnly = item.date.split(' ')[0];
+                
+                row.innerHTML = `
+                    <td class="date-time">${dateOnly}</td>
+                    <td class="date-time">${item.time}</td>
+                    <td class="stock-name">${item.name}</td>
+                    <td class="news-title">${item.title}</td>
+                    <td><a href="${item.link}" class="news-link" target="_blank">查看</a></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 重置筛选条件
+        function resetFilters() {
+            document.getElementById('dateFilter').value = 'all';
+            document.getElementById('stockFilter').value = 'all';
+            document.getElementById('searchFilter').value = '';
+            
+            state.dateFilter = 'all';
+            state.stockFilter = 'all';
+            state.searchFilter = '';
+            
+            applyFiltersAndSort();
+        }
+
+        // 显示刷新动画
+        function showRefreshAnimation() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.innerHTML = '<span class="loading">⏳</span> 刷新中...';
+            refreshBtn.disabled = true;
+        }
+        
+        // 隐藏刷新动画
+        function hideRefreshAnimation() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.innerHTML = '刷新数据';
+            refreshBtn.disabled = false;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initFilters();
+            
+            // 设置初始状态
+            state.filteredData = [...newsData];
+            applyFiltersAndSort();
+            
+            // 绑定筛选器事件
+            document.getElementById('dateFilter').addEventListener('change', (e) => {
+                state.dateFilter = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            document.getElementById('stockFilter').addEventListener('change', (e) => {
+                state.stockFilter = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            document.getElementById('searchFilter').addEventListener('input', (e) => {
+                state.searchFilter = e.target.value;
+                applyFiltersAndSort();
+            });
+            
+            // 添加按钮事件
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                showRefreshAnimation();
+                
+                // 模拟刷新延迟
+                setTimeout(() => {
+                    applyFiltersAndSort();
+                    hideRefreshAnimation();
+                }, 800);
+            });
+            
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                resetFilters();
+            });
+            
+            // 自动刷新（每5分钟）
+            setInterval(() => {
+                applyFiltersAndSort();
+            }, 5 * 60 * 1000);
+        });
+    </script>
+</body>
+</html>
