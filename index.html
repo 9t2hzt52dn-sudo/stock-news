@@ -3,439 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个股公告信息查询</title>
+    <title>个股公告新闻信息</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
         }
-        
         body {
             background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
             padding: 10px;
-            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
         }
-        
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
         }
-        
-        header {
-            background: #1a6dfc;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            position: relative;
-        }
-        
         h1 {
+            text-align: center;
+            margin: 15px 0;
             font-size: 18px;
-            font-weight: 600;
+            color: #1a1a1a;
         }
-        
-        .refresh-btn {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        
         .filters {
+            background-color: #fff;
             padding: 12px;
-            background: #f9f9f9;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        
         .filter-group {
-            flex: 1;
-            min-width: 150px;
+            margin-bottom: 10px;
         }
-        
         label {
             display: block;
             margin-bottom: 5px;
-            font-size: 13px;
+            font-size: 14px;
             color: #666;
         }
-        
-        select, input {
+        input, select {
             width: 100%;
             padding: 8px 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
-            background: white;
         }
-        
-        .table-container {
-            overflow-x: auto;
-            max-height: calc(100vh - 180px);
-            overflow-y: auto;
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
         }
-        
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #1e88e5;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1976d2;
+        }
+        button#refresh {
+            background-color: #43a047;
+        }
+        button#refresh:hover {
+            background-color: #388e3c;
+        }
+        .data-table {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            font-size: 13px;
         }
-        
         thead {
+            background-color: #f0f0f0;
             position: sticky;
             top: 0;
-            background: #f0f0f0;
-            z-index: 10;
         }
-        
-        th {
-            padding: 12px 8px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-            color: #333;
-            border-bottom: 1px solid #ddd;
-            white-space: nowrap;
-        }
-        
-        td {
+        th, td {
             padding: 10px 8px;
+            text-align: left;
             border-bottom: 1px solid #eee;
-            font-size: 13px;
-            vertical-align: top;
         }
-        
+        th {
+            font-weight: 600;
+            color: #555;
+        }
         tr:last-child td {
             border-bottom: none;
         }
-        
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-        
-        .date-col {
-            width: 100px;
-        }
-        
-        .time-col {
-            width: 80px;
-        }
-        
-        .name-col {
-            width: 100px;
+        .stock-name {
             font-weight: 600;
-            color: #1a6dfc;
+            color: #1e88e5;
         }
-        
-        .topic-col {
-            min-width: 200px;
+        .date {
+            color: #666;
+            white-space: nowrap;
         }
-        
-        .link-col {
-            width: 40px;
-            text-align: center;
+        .time {
+            color: #999;
+            white-space: nowrap;
         }
-        
-        .link-btn {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            background: #1a6dfc;
-            color: white;
-            border-radius: 4px;
-            text-align: center;
-            line-height: 30px;
+        .subject {
+            word-break: break-word;
+        }
+        .link {
+            color: #1e88e5;
             text-decoration: none;
             font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+            display: inline-block;
         }
-        
-        .empty-message {
+        .no-data {
+            text-align: center;
             padding: 20px;
-            text-align: center;
             color: #999;
         }
-        
-        footer {
-            padding: 10px;
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            border-top: 1px solid #eee;
-        }
-        
         @media (max-width: 480px) {
-            .filters {
-                flex-direction: column;
-            }
-            
-            .filter-group {
-                min-width: 100%;
-            }
+            th:nth-child(1), td:nth-child(1) { width: 20%; } /* 日期 */
+            th:nth-child(2), td:nth-child(2) { width: 15%; } /* 时间 */
+            th:nth-child(3), td:nth-child(3) { width: 20%; } /* 名称 */
+            th:nth-child(4), td:nth-child(4) { width: 35%; } /* 主题 */
+            th:nth-child(5), td:nth-child(5) { width: 10%; } /* 链接 */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>个股公告信息查询</h1>
-            <button class="refresh-btn" id="refreshBtn">↻</button>
-        </header>
+        <h1>个股公告新闻信息</h1>
         
         <div class="filters">
             <div class="filter-group">
-                <label for="dateFilter">日期筛选</label>
-                <select id="dateFilter">
-                    <option value="">全部日期</option>
-                </select>
+                <label for="dateFilter">筛选日期</label>
+                <input type="date" id="dateFilter">
             </div>
-            
             <div class="filter-group">
-                <label for="stockFilter">股票筛选</label>
+                <label for="stockFilter">筛选股票</label>
                 <select id="stockFilter">
                     <option value="">全部股票</option>
                 </select>
             </div>
+            <div class="buttons">
+                <button id="applyFilters">应用筛选</button>
+                <button id="resetFilters">重置筛选</button>
+                <button id="refresh">刷新数据</button>
+            </div>
         </div>
         
-        <div class="table-container">
-            <table id="dataTable">
+        <div class="data-table">
+            <table id="stockTable">
                 <thead>
                     <tr>
-                        <th class="date-col">日期</th>
-                        <th class="time-col">时间</th>
-                        <th class="name-col">名称</th>
-                        <th class="topic-col">主题</th>
-                        <th class="link-col">链接</th>
+                        <th>日期</th>
+                        <th>时间</th>
+                        <th>名称</th>
+                        <th>主题</th>
+                        <th>链接</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- 数据将通过JavaScript动态填充 -->
+                    <!-- 数据将通过JavaScript填充 -->
                 </tbody>
             </table>
         </div>
-        
-        <footer>
-            <p>数据更新于 <span id="lastUpdateTime"></span></p>
-        </footer>
     </div>
 
     <script>
-        // 从Excel表格中提取的所有数据
+        // 原始数据
         const stockData = [
-            { date: "2025-11-23", time: "00:02:00", name: "烽火通信", topic: "烽火通信：烽火通信科技股份有限公司关于\"烽火转债\"到期兑付暨摘牌的公告", link: "http://news.10jqka.com.cn/field/sn/20251124/55007869.shtml" },
-            { date: "2025-11-23", time: "00:04:00", name: "烽火通信", topic: "烽火通信：烽火通信科技股份有限公司关于股份回购进展公告", link: "http://news.10jqka.com.cn/field/sn/20251124/55007851.shtml" },
-            { date: "2025-11-23", time: "13:21:00", name: "胜宏科技", topic: "高成长+高回撤+高ROE的优质科技股曝光", link: "http://news.10jqka.com.cn/20251123/c672674066.shtml" },
-            { date: "2025-11-23", time: "13:21:00", name: "生益科技", topic: "高成长+高回撤+高ROE的优质科技股曝光", link: "http://news.10jqka.com.cn/20251123/c672674066.shtml" },
-            { date: "2025-11-23", time: "10:03:00", name: "视觉中国", topic: "被摄影师起诉侵权，视觉中国公开致歉：涉案作品已下架！\"系签约供稿人违规上传，已永久封禁其账号\"", link: "http://news.10jqka.com.cn/20251123/c672673588.shtml" },
-            { date: "2025-11-23", time: "07:11:00", name: "视觉中国", topic: "视觉中国致歉：侵权涉案作品已于诉讼发生后在网站下架 侵权行为终止", link: "http://news.10jqka.com.cn/20251123/c672673102.shtml" },
-            { date: "2025-11-23", time: "13:21:00", name: "深南电路", topic: "高成长+高回撤+高ROE的优质科技股曝光", link: "http://news.10jqka.com.cn/20251123/c672674066.shtml" },
-            { date: "2025-11-23", time: "08:48:00", name: "光迅科技", topic: "601238，重大利好！卫星通信产业拐点在即，机构扎堆看好15只概念股", link: "http://news.10jqka.com.cn/20251123/c672673347.shtml" },
-            { date: "2025-11-23", time: "21:36:00", name: "胜宏科技", topic: "10月以来，高毅多次调研这三家公司", link: "http://news.10jqka.com.cn/20251123/c672675297.shtml" },
-            { date: "2025-11-23", time: "21:54:00", name: "中际旭创", topic: "中际旭创：公司国内市场收入占公司总的营收比重为13.19%", link: "http://news.10jqka.com.cn/20251123/c672675355.shtml" },
-            { date: "2025-11-24", time: "05:32:00", name: "烽火通信", topic: "回购增持\"进度条\"频频刷新 上市公司纷纷出手稳预期", link: "http://news.10jqka.com.cn/20251124/c672676019.shtml" },
-            { date: "2025-11-24", time: "06:57:00", name: "烽火通信", topic: "烽火通信以纤缆技术创新擘画智能时代新蓝图", link: "http://news.10jqka.com.cn/20251124/c672676423.shtml" },
-            { date: "2025-11-24", time: "06:58:00", name: "沪电股份", topic: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
-            { date: "2025-11-24", time: "07:00:00", name: "视觉中国", topic: "券商观点|计算机行业周报：Google引领全球AI产业前进", link: "http://news.10jqka.com.cn/20251124/c672676458.shtml" },
-            { date: "2025-11-24", time: "09:05:00", name: "中文在线", topic: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
-            { date: "2025-11-24", time: "07:00:00", name: "中文在线", topic: "券商观点|计算机行业周报：Google引领全球AI产业前进", link: "http://news.10jqka.com.cn/20251124/c672676458.shtml" },
-            { date: "2025-11-24", time: "08:50:00", name: "圣邦股份", topic: "以高可靠芯片，护航汽车安全：圣邦微电子荣获IATF 16949:2016符合证明函", link: "http://news.10jqka.com.cn/20251124/c672678039.shtml" },
-            { date: "2025-11-24", time: "05:32:00", name: "汇顶科技", topic: "回购增持\"进度条\"频频刷新 上市公司纷纷出手稳预期", link: "http://news.10jqka.com.cn/20251124/c672676019.shtml" },
-            { date: "2025-11-24", time: "07:07:00", name: "兆易创新", topic: "券商观点|电子行业周报：NV业绩强劲、谷歌发布Gemini3，算力景气度持续验证", link: "http://news.10jqka.com.cn/20251124/c672676560.shtml" },
-            { date: "2025-11-24", time: "07:08:00", name: "天孚通信", topic: "券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力", link: "http://news.10jqka.com.cn/20251124/c672676568.shtml" },
-            { date: "2025-11-24", time: "08:00:00", name: "中际旭创", topic: "最新！订单爆棚的公司名单来了，12家获机构扎堆关注", link: "http://news.10jqka.com.cn/20251124/c672676937.shtml" },
-            { date: "2025-11-24", time: "06:58:00", name: "润建股份", topic: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
-            { date: "2025-11-24", time: "06:58:00", name: "润建股份", topic: "校企协同！润建股份加速产学研合作，共绘中国-东盟AI农业新蓝图", link: "http://news.10jqka.com.cn/20251124/c672676430.shtml" },
-            { date: "2025-11-24", time: "06:58:00", name: "润泽科技", topic: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
-            { date: "2025-11-24", time: "07:08:00", name: "光环新网", topic: "券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力", link: "http://news.10jqka.com.cn/20251124/c672676568.shtml" },
-            { date: "2025-11-24", time: "06:58:00", name: "光环新网", topic: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
-            { date: "2025-11-24", time: "07:08:00", name: "奥飞数据", topic: "券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力", link: "http://news.10jqka.com.cn/20251124/c672676568.shtml" },
-            { date: "2025-11-24", time: "06:58:00", name: "奥飞数据", topic: "券商观点|通信行业周报：AI创新引领算力突围", link: "http://news.10jqka.com.cn/20251124/c672676438.shtml" },
-            { date: "2025-11-24", time: "07:00:00", name: "数据港", topic: "券商观点|计算机行业周报：Google引领全球AI产业前进", link: "http://news.10jqka.com.cn/20251124/c672676458.shtml" },
-            { date: "2025-11-24", time: "08:48:00", name: "兆易创新", topic: "2025年11月24日早间个股预警：安达智能股东易指通拟减持不超2.74%股份等", link: "http://news.10jqka.com.cn/20251124/c672677983.shtml" },
-            { date: "2025-11-24", time: "09:05:00", name: "胜宏科技", topic: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
-            { date: "2025-11-24", time: "09:05:00", name: "东山精密", topic: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
-            { date: "2025-11-24", time: "08:41:00", name: "中兴通讯", topic: "上市公司纷纷抢位6G 诸多瓶颈待破", link: "http://news.10jqka.com.cn/20251124/c672677832.shtml" },
-            { date: "2025-11-24", time: "09:05:00", name: "兆易创新", topic: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
-            { date: "2025-11-24", time: "09:05:00", name: "中际旭创", topic: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
-            { date: "2025-11-24", time: "09:05:00", name: "新易盛", topic: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
-            { date: "2025-11-24", time: "09:05:00", name: "赛微电子", topic: "11月21日13个行业出现融资净买入，这些个股受融资客青睐！", link: "http://news.10jqka.com.cn/20251124/c672679119.shtml" },
-            { date: "2025-11-24", time: "08:52:00", name: "长川科技", topic: "今日盘后生效，MSCI中国指数新纳26股！", link: "http://news.10jqka.com.cn/20251124/c672678066.shtml" },
-            { date: "2025-11-25", time: "08:52:00", name: "视觉中国", topic: "算力之后，AI的价值洼地轮到谁了？", link: "http://news.10jqka.com.cn/20251125/c672708172.shtml" },
-            { date: "2025-11-25", time: "05:47:00", name: "视觉中国", topic: "阿里千问引爆下载热潮 资金涌入AI应用板块", link: "http://news.10jqka.com.cn/20251125/c672705264.shtml" },
-            { date: "2025-11-25", time: "07:24:00", name: "汇顶科技", topic: "多家上市公司回购增持刷新进度", link: "http://news.10jqka.com.cn/20251125/c672706427.shtml" },
-            { date: "2025-11-25", time: "00:04:00", name: "汇顶科技", topic: "汇顶科技：关于以集中竞价交易方式首次回购公司股份的公告", link: "http://news.10jqka.com.cn/field/sn/20251125/55013937.shtml" },
-            { date: "2025-11-25", time: "06:21:00", name: "豪威集团", topic: "新管理层助力豪威进一步提升运营效率", link: "http://news.10jqka.com.cn/field/sr/20251125/55025263.shtml" },
-            { date: "2025-11-25", time: "05:47:00", name: "中贝通信", topic: "中贝通信李六兵：19亿元定增锚定AI未来", link: "http://news.10jqka.com.cn/20251125/c672705275.shtml" },
-            { date: "2025-11-25", time: "05:47:00", name: "数据港", topic: "阿里千问引爆下载热潮 资金涌入AI应用板块", link: "http://news.10jqka.com.cn/20251125/c672705264.shtml" },
-            { date: "2025-11-25", time: "00:02:00", name: "中际旭创", topic: "中际旭创：关于部分高级管理人员减持计划期限届满暨实施情况公告", link: "http://news.10jqka.com.cn/field/sn/20251125/55021559.shtml" },
-            { date: "2025-11-25", time: "08:09:00", name: "天孚通信", topic: "天孚通信：光模块厂商是公司的主要客户", link: "http://news.10jqka.com.cn/20251125/c672707098.shtml" },
-            { date: "2025-11-25", time: "00:30:00", name: "天孚通信", topic: "天孚通信（截止2025年11月20日）股东人数为141530户 环比增加10.55%", link: "http://news.10jqka.com.cn/20251125/c672704663.shtml" },
-            { date: "2025-11-25", time: "08:19:00", name: "光迅科技", topic: "光迅科技：向特定对象发行股票申请获深交所受理", link: "http://news.10jqka.com.cn/20251125/c672707501.shtml" },
-            { date: "2025-11-25", time: "00:02:00", name: "光迅科技", topic: "光迅科技：武汉光迅科技股份有限公司2025年度向特定对象发行股票募集说明书（申报稿）", link: "http://news.10jqka.com.cn/field/sn/20251125/55025141.shtml" },
-            { date: "2025-11-25", time: "00:00:00", name: "光迅科技", topic: "光迅科技：武汉光迅科技股份有限公司最近一年的财务报告及其审计报告以及最近一期的财务报告", link: "http://news.10jqka.com.cn/field/sn/20251125/55025143.shtml" },
-            { date: "2025-11-25", time: "00:00:00", name: "光迅科技", topic: "光迅科技：北京市嘉源律师事务所关于武汉光迅科技股份有限公司2025年度向特定对象发行股票的法律意见书", link: "http://news.10jqka.com.cn/field/sn/20251125/55025139.shtml" },
-            { date: "2025-11-25", time: "00:00:00", name: "光迅科技", topic: "光迅科技：申万宏源证券承销保荐有限责任公司关于武汉光迅科技股份有限公司向特定对象发行股票并在主板上市之发行保荐书", link: "http://news.10jqka.com.cn/field/sn/20251125/55025137.shtml" },
-            { date: "2025-11-25", time: "07:24:00", name: "烽火通信", topic: "多家上市公司回购增持刷新进度", link: "http://news.10jqka.com.cn/20251125/c672706427.shtml" },
-            { date: "2025-11-25", time: "08:52:00", name: "昆仑万维", topic: "算力之后，AI的价值洼地轮到谁了？", link: "http://news.10jqka.com.cn/20251125/c672708172.shtml" },
-            { date: "2025-11-25", time: "05:47:00", name: "昆仑万维", topic: "阿里千问引爆下载热潮 资金涌入AI应用板块", link: "http://news.10jqka.com.cn/20251125/c672705264.shtml" },
-            { date: "2025-11-25", time: "08:52:00", name: "吉比特", topic: "算力之后，AI的价值洼地轮到谁了？", link: "http://news.10jqka.com.cn/20251125/c672708172.shtml" },
-            { date: "2025-11-25", time: "18:18:00", name: "胜宏科技", topic: "回购超1亿元+股价回调！这些潜力股暗藏修复机会？", link: "http://news.10jqka.com.cn/20251125/c672722584.shtml" },
-            { date: "2025-11-25", time: "16:29:00", name: "胜宏科技", topic: "多只电子、通信板块个股获大额资金流入", link: "http://news.10jqka.com.cn/20251125/c672719780.shtml" },
-            { date: "2025-11-25", time: "11:33:00", name: "胜宏科技", topic: "直逼涨停！这只股最新股东户数骤降超三成", link: "http://news.10jqka.com.cn/20251125/c672714696.shtml" },
-            { date: "2025-11-25", time: "09:54:00", name: "胜宏科技", topic: "PCB概念震荡反弹 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712522.shtml" },
-            { date: "2025-11-25", time: "16:57:00", name: "鹏鼎控股", topic: "鹏鼎控股：积极推进与知名厂商的产品开发及认证", link: "http://news.10jqka.com.cn/20251125/c672720464.shtml" },
-            { date: "2025-11-25", time: "09:54:00", name: "鹏鼎控股", topic: "PCB概念震荡反弹 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712522.shtml" },
-            { date: "2025-11-25", time: "09:53:00", name: "鹏鼎控股", topic: "元件板块异动走高 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712454.shtml" },
-            { date: "2025-11-25", time: "16:29:00", name: "沪电股份", topic: "多只电子、通信板块个股获大额资金流入", link: "http://news.10jqka.com.cn/20251125/c672719780.shtml" },
-            { date: "2025-11-25", time: "10:35:00", name: "沪电股份", topic: "海内外算力链利好共振 CPO、PCB板块大幅走强", link: "http://news.10jqka.com.cn/20251125/c672713653.shtml" },
-            { date: "2025-11-25", time: "09:54:00", name: "沪电股份", topic: "PCB概念震荡反弹 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712522.shtml" },
-            { date: "2025-11-25", time: "09:53:00", name: "沪电股份", topic: "元件板块异动走高 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712454.shtml" },
-            { date: "2025-11-25", time: "14:54:00", name: "生益科技", topic: "苏州生益：\"三步走\"破解首批次新材料应用难题", link: "http://news.10jqka.com.cn/20251125/c672716985.shtml" },
-            { date: "2025-11-25", time: "09:54:00", name: "生益科技", topic: "PCB概念震荡反弹 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712522.shtml" },
-            { date: "2025-11-25", time: "09:54:00", name: "深南电路", topic: "PCB概念震荡反弹 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712522.shtml" },
-            { date: "2025-11-25", time: "09:18:00", name: "深南电路", topic: "深南电路：11月24日持仓该股ETF资金净流入963.19万元，3日累计净流入1200.55万元", link: "http://news.10jqka.com.cn/20251125/c672711424.shtml" },
-            { date: "2025-11-25", time: "11:33:00", name: "东山精密", topic: "直逼涨停！这只股最新股东户数骤降超三成", link: "http://news.10jqka.com.cn/20251125/c672714696.shtml" },
-            { date: "2025-11-25", time: "09:53:00", name: "东山精密", topic: "元件板块异动走高 沪电股份涨停", link: "http://news.10jqka.com.cn/20251125/c672712454.shtml" },
-            { date: "2025-11-25", time: "09:18:00", name: "东山精密", topic: "东山精密：11月24日持仓该股ETF资金净流入771.20万元，3日累计净流入1677.48万元", link: "http://news.10jqka.com.cn/20251125/c672711436.shtml" },
-            { date: "2025-11-25", time: "05:47:00", name: "视觉中国", topic: "阿里千问引爆下载热潮 资金涌入AI应用板块", link: "http://news.10jqka.com.cn/20251125/c672705264.shtml" },
-            { date: "2025-11-25", time: "21:15:00", name: "中文在线", topic: "电影《罗小黑战记2》转战线上热度不减，中文在线IP业务跑通了？", link: "http://news.10jqka.com.cn/20251125/c672734306.shtml" },
-            { date: "2025-11-25", time: "15:00:00", name: "芒果超媒", topic: "中国银河证券：AI赋能与内容价值重估 把握高质量发展主线", link: "http://news.10jqka.com.cn/20251125/c672717090.shtml" },
-            { date: "2025-11-25", time: "14:30:00", name: "芒果超媒", topic: "券商观点|2026年年度策略：核心资产筑安全边际，优质内容+AI应用燃增长引擎", link: "http://news.10jqka.com.cn/20251125/c672716628.shtml" },
-            { date: "2025-11-25", time: "21:13:00", name: "圣邦股份", topic: "精准测量，创新引领：圣邦微电子SGM58201荣获\"2025全球电子成就奖之年度创新产品奖\"", link: "http://news.10jqka.com.cn/20251125/c672734284.shtml" },
-            { date: "2025-11-25", time: "09:18:00", name: "圣邦股份", topic: "圣邦股份：11月24日持仓该股ETF资金净流入1003.61万元，3日累计净流入6247.50万元", link: "http://news.10jqka.com.cn/20251125/c672711511.shtml" },
-            { date: "2025-11-25", time: "12:13:00", name: "汇顶科技", topic: "作业帮新一代学练机S50搭载汇顶科技组合方案", link: "http://news.10jqka.com.cn/20251125/c672715111.shtml" },
-            { date: "2025-11-25", time: "07:24:00", name: "汇顶科技", topic: "多家上市公司回购增持刷新进度", link: "http://news.10jqka.com.cn/20251125/c672706427.shtml" },
-            { date: "2025-11-25", time: "00:04:00", name: "汇顶科技", topic: "汇顶科技：关于以集中竞价交易方式首次回购公司股份的公告", link: "http://news.10jqka.com.cn/field/sn/20251125/55013937.shtml" },
-            { date: "2025-11-25", time: "15:36:00", name: "上海贝岭", topic: "上海贝岭：公司与上海微电子无合作", link: "http://news.10jqka.com.cn/20251125/c672717958.shtml" },
-            { date: "2025-11-25", time: "15:36:00", name: "上海贝岭", topic: "上海贝岭：截至目前公司没有吸收并购计划", link: "http://news.10jqka.com.cn/20251125/c672717954.shtml" },
-            { date: "2025-11-25", time: "15:36:00", name: "上海贝岭", topic: "上海贝岭：截至2025年上半年，公司推出539款新产品", link: "http://news.10jqka.com.cn/20251125/c672717941.shtml" },
-            { date: "2025-11-25", time: "15:36:00", name: "上海贝岭", topic: "上海贝岭：公司新推出的DDR5内存SPD芯片产品BL5118...", link: "http://news.10jqka.com.cn/20251125/c672717832.shtml" },
-            { date: "2025-11-25", time: "06:21:00", name: "豪威集团", topic: "新管理层助力豪威进一步提升运营效率", link: "http://news.10jqka.com.cn/field/sr/20251125/55025263.shtml" },
-            { date: "2025-11-25", time: "21:05:00", name: "兆易创新", topic: "兆易创新GD32G5系列荣膺2025全球电子成就奖\"年度微控制器/接口产品\"奖", link: "http://news.10jqka.com.cn/20251125/c672734053.shtml" },
-            { date: "2025-11-25", time: "09:18:00", name: "兆易创新", topic: "兆易创新：11月24日持仓该股ETF资金净流入2784.89万元，3日累计净流入1.11亿元", link: "http://news.10jqka.com.cn/20251125/c672711417.shtml" },
-            { date: "2025-11-25", time: "11:23:00", name: "瑞芯微", topic: "瑞芯微AIoT处理器RK3562获\"中国芯\"", link: "http://news.10jqka.com.cn/20251125/c672714493.shtml" },
-            { date: "2025-11-25", time: "18:13:00", name: "普天科技", topic: "普天科技：产业投资基金有限责任公司持股比例降至5%以下", link: "http://news.10jqka.com.cn/20251125/c672722493.shtml" },
-            { date: "2025-11-26", time: "00:04:00", name: "普天科技", topic: "普天科技：《简式权益变动报告书》（产业投资基金）", link: "http://news.10jqka.com.cn/field/sn/20251126/55034215.shtml" },
-            { date: "2025-11-25", time: "18:59:00", name: "润建股份", topic: "润建股份筹划赴港上市事项", link: "http://news.10jqka.com.cn/20251125/c672723518.shtml" },
-            { date: "2025-11-25", time: "18:46:00", name: "润建股份", topic: "润建股份：拟发行H股股票并在香港联交所上市", link: "http://news.10jqka.com.cn/20251125/c672723119.shtml" },
-            { date: "2025-11-25", time: "18:05:00", name: "润建股份", topic: "产教融合！润建股份与广西职业师范学院共建产学研基地，共筑AI教育新生态", link: "http://news.10jqka.com.cn/20251125/c672722225.shtml" },
-            { date: "2025-11-25", time: "15:23:00", name: "嘉环科技", topic: "嘉环科技与陕西三原共建双碳运营中心，携手擘画区域绿色高质量发展", link: "http://news.10jqka.com.cn/20251125/c672717492.shtml" },
-            { date: "2025-11-25", time: "18:18:00", name: "润泽科技", topic: "回购超1亿元+股价回调！这些潜力股暗藏修复机会？", link: "http://news.10jqka.com.cn/20251125/c672722584.shtml" },
-            { date: "2025-11-25", time: "20:31:00", name: "中际旭创", topic: "中际旭创接连被股东、高管减持", link: "http://news.10jqka.com.cn/20251125/c672732478.shtml" },
-            { date: "2025-11-25", time: "13:10:00", name: "中际旭创", topic: "券商观点|电子行业周报：Google发布第三代旗舰人工智能模型Gemini 3", link: "http://news.10jqka.com.cn/20251125/c672715580.shtml" },
-            { date: "2025-11-25", time: "11:33:00", name: "中际旭创", topic: "直逼涨停！这只股最新股东户数骤降超三成", link: "http://news.10jqka.com.cn/20251125/c672714696.shtml" },
-            { date: "2025-11-25", time: "10:51:00", name: "中际旭创", topic: "新易盛、中际旭创狂拉6%，云计算ETF大涨3.26%！机构：AI叙事迈向奇点关键期", link: "http://news.10jqka.com.cn/20251125/c672713929.shtml" },
-            { date: "2025-11-25", time: "11:33:00", name: "新易盛", topic: "直逼涨停！这只股最新股东户数骤降超三成", link: "http://news.10jqka.com.cn/20251125/c672714696.shtml" },
-            { date: "2025-11-25", time: "10:54:00", name: "新易盛", topic: "中原证券通信行业2026年度策略：智启新质 算力互联破浪前行", link: "http://news.10jqka.com.cn/20251125/c672713976.shtml" },
-            { date: "2025-11-25", time: "10:51:00", name: "新易盛", topic: "新易盛、中际旭创狂拉6%，云计算ETF大涨3.26%！机构：AI叙事迈向奇点关键期", link: "http://news.10jqka.com.cn/20251125/c672713929.shtml" },
-            { date: "2025-11-25", time: "10:06:00", name: "新易盛", topic: "CPO板块持续走强", link: "http://news.10jqka.com.cn/20251125/c672712837.shtml" },
-            { date: "2025-11-25", time: "16:59:00", name: "中兴通讯", topic: "概念动态|中兴通讯新增\"汽车芯片\"概念", link: "http://news.10jqka.com.cn/20251125/c672720509.shtml" },
-            { date: "2025-11-25", time: "16:05:00", name: "中兴通讯", topic: "中兴通讯午后涨超4% 自研车规级芯片\"撼域\"M1已搭载埃安旗下车型", link: "http://news.10jqka.com.cn/20251125/c672719181.shtml" },
-            { date: "2025-11-25", time: "16:03:00", name: "中兴通讯", topic: "国产汽车全\"芯\"突破！中兴通讯\"撼域\"M1助力广汽驶入智能化快车道", link: "http://news.10jqka.com.cn/20251125/c672719140.shtml" },
-            { date: "2025-11-25", time: "12:02:00", name: "中兴通讯", topic: "港股午评：恒生指数涨0.61%，恒生科技指数涨1.15%", link: "http://news.10jqka.com.cn/20251125/c672715017.shtml" },
-            { date: "2025-11-25", time: "18:16:00", name: "天孚通信", topic: "天孚通信：控股股东天孚仁和转让301.1万股 总金额4.22亿元", link: "http://news.10jqka.com.cn/20251125/c672722556.shtml" },
-            { date: "2025-11-25", time: "09:18:00", name: "天孚通信", topic: "天孚通信：11月24日持仓该股ETF资金净流入4043.10万元，3日累计净流入1.83亿元", link: "http://news.10jqka.com.cn/20251125/c672711457.shtml" },
-            { date: "2025-11-25", time: "10:54:00", name: "光迅科技", topic: "中原证券通信行业2026年度策略：智启新质 算力互联破浪前行", link: "http://news.10jqka.com.cn/20251125/c672713976.shtml" },
-            { date: "2025-11-25", time: "15:06:00", name: "烽火通信", topic: "概念动态|烽火通信新增\"商业航天\"概念", link: "http://news.10jqka.com.cn/20251125/c672717180.shtml" },
-            { date: "2025-11-25", time: "12:18:00", name: "烽火通信", topic: "烽火通信旗下长江计算中标联通数科智算服务器集采项目", link: "http://news.10jqka.com.cn/20251125/c672715153.shtml" },
-            { date: "2025-11-25", time: "12:11:00", name: "烽火通信", topic: "智算大单！烽火通信旗下长江计算赋能运营商算力升级", link: "http://news.10jqka.com.cn/20251125/c672715093.shtml" },
-            { date: "2025-11-25", time: "11:58:00", name: "立昂微", topic: "广发证券：AI驱动电子行业景气持续上行 营收&利润同环比向上", link: "http://news.10jqka.com.cn/20251125/c672714927.shtml" },
-            { date: "2025-11-26", time: "04:54:00", name: "胜宏科技", topic: "A股年内累计回购超1300亿元 超百家实施公司股价翻倍", link: "http://news.10jqka.com.cn/20251126/c672736330.shtml" },
-            { date: "2025-11-26", time: "05:14:00", name: "生益科技", topic: "“一键买入”泡泡玛特、老铺黄金，韩国巨头出手", link: "http://news.10jqka.com.cn/20251126/c672736413.shtml" },
-            { date: "2025-11-26", time: "00:03:00", name: "上海贝岭", topic: "上海贝岭第九届董事会第二十二次会议决议公告", link: "http://news.10jqka.com.cn/field/sn/20251126/55029547.shtml" },
-            { date: "2025-11-26", time: "00:03:00", name: "上海贝岭", topic: "上海贝岭关于召开2025年第二次临时股东会的通知", link: "http://news.10jqka.com.cn/field/sn/20251126/55029551.shtml" },
-            { date: "2025-11-26", time: "00:02:00", name: "上海贝岭", topic: "上海贝岭关于选举非独立董事的公告", link: "http://news.10jqka.com.cn/field/sn/20251126/55029549.shtml" },
-            { date: "2025-11-26", time: "00:00:00", name: "上海贝岭", topic: "上海贝岭董事会审计与风险控制委员会工作细则（第三版）", link: "http://news.10jqka.com.cn/field/sn/20251126/55029535.shtml" },
-            { date: "2025-11-26", time: "05:14:00", name: "兆易创新", topic: "“一键买入”泡泡玛特、老铺黄金，韩国巨头出手", link: "http://news.10jqka.com.cn/20251126/c672736413.shtml" },
-            { date: "2025-11-26", time: "04:54:00", name: "兆易创新", topic: "AI应用推升存储芯片需求 行业高景气度或持续至明年年中", link: "http://news.10jqka.com.cn/20251126/c672736331.shtml" },
-            { date: "2025-11-26", time: "00:04:00", name: "普天科技", topic: "《简式权益变动报告书》（产业投资基金）", link: "http://news.10jqka.com.cn/field/sn/20251126/55034215.shtml" },
-            { date: "2025-11-26", time: "00:04:00", name: "普天科技", topic: "关于持股5%以上股东减持至5%以下的权益变动暨触及1%整数倍提示性公告", link: "http://news.10jqka.com.cn/field/sn/20251126/55034213.shtml" },
-            { date: "2025-11-26", time: "00:03:00", name: "润建股份", topic: "关于筹划发行H股股票并在香港联合交易所有限公司上市的提示性公告", link: "http://news.10jqka.com.cn/field/sn/20251126/55035331.shtml" },
-            { date: "2025-11-26", time: "08:33:00", name: "中际旭创", topic: "调整被视作\"黄金坑\"，这一超强板块卷土重来", link: "http://news.10jqka.com.cn/20251126/c672738933.shtml" },
-            { date: "2025-11-26", time: "08:33:00", name: "新易盛", topic: "调整被视作\"黄金坑\"，这一超强板块卷土重来", link: "http://news.10jqka.com.cn/20251126/c672738933.shtml" },
-            { date: "2025-11-26", time: "08:48:00", name: "天孚通信", topic: "2025年11月26日早间个股预警：天地数码拟4900万元转让天浩数码100%股权;紫燕食品股东拟合计减持不超0.67%股份", link: "http://news.10jqka.com.cn/20251126/c672739178.shtml" },
-            { date: "2025-11-26", time: "08:33:00", name: "光迅科技", topic: "调整被视作\"黄金坑\"，这一超强板块卷土重来", link: "http://news.10jqka.com.cn/20251126/c672738933.shtml" },
-            { date: "2025-11-26", time: "05:30:00", name: "国联股份", topic: "国联股份长三角数字经济总部启用", link: "http://news.10jqka.com.cn/20251126/c672736434.shtml" }
+            { date: '2025-11-23', time: '00:02:00', name: '烽火通信', subject: '烽火通信：烽火通信科技股份有限公司关于"烽火转债"到期兑付暨摘牌的公告', link: 'http://news.10jqka.com.cn/field/sn/20251124/55007869.shtml' },
+            { date: '2025-11-23', time: '00:04:00', name: '烽火通信', subject: '烽火通信：烽火通信科技股份有限公司关于股份回购进展公告', link: 'http://news.10jqka.com.cn/field/sn/20251124/55007851.shtml' },
+            { date: '2025-11-23', time: '13:21:00', name: '胜宏科技', subject: '高成长+高回撤+高ROE的优质科技股曝光', link: 'http://news.10jqka.com.cn/20251123/c672674066.shtml' },
+            { date: '2025-11-23', time: '13:21:00', name: '生益科技', subject: '高成长+高回撤+高ROE的优质科技股曝光', link: 'http://news.10jqka.com.cn/20251123/c672674066.shtml' },
+            { date: '2025-11-23', time: '10:03:00', name: '视觉中国', subject: '被摄影师起诉侵权，视觉中国公开致歉：涉案作品已下架！"系签约供稿人违规上传，已永久封禁其账号"', link: 'http://news.10jqka.com.cn/20251123/c672673588.shtml' },
+            { date: '2025-11-23', time: '07:11:00', name: '视觉中国', subject: '视觉中国致歉：侵权涉案作品已于诉讼发生后在网站下架 侵权行为终止', link: 'http://news.10jqka.com.cn/20251123/c672673102.shtml' },
+            { date: '2025-11-23', time: '13:21:00', name: '深南电路', subject: '高成长+高回撤+高ROE的优质科技股曝光', link: 'http://news.10jqka.com.cn/20251123/c672674066.shtml' },
+            { date: '2025-11-23', time: '08:48:00', name: '光迅科技', subject: '601238，重大利好！卫星通信产业拐点在即，机构扎堆看好15只概念股', link: 'http://news.10jqka.com.cn/20251123/c672673347.shtml' },
+            { date: '2025-11-23', time: '21:36:00', name: '胜宏科技', subject: '10月以来，高毅多次调研这三家公司', link: 'http://news.10jqka.com.cn/20251123/c672675297.shtml' },
+            { date: '2025-11-23', time: '21:54:00', name: '中际旭创', subject: '中际旭创：公司国内市场收入占公司总的营收比重为13.19%', link: 'http://news.10jqka.com.cn/20251123/c672675355.shtml' },
+            { date: '2025-11-24', time: '05:32:00', name: '烽火通信', subject: '回购增持"进度条"频频刷新 上市公司纷纷出手稳预期', link: 'http://news.10jqka.com.cn/20251124/c672676019.shtml' },
+            { date: '2025-11-24', time: '06:57:00', name: '烽火通信', subject: '烽火通信以纤缆技术创新擘画智能时代新蓝图', link: 'http://news.10jqka.com.cn/20251124/c672676423.shtml' },
+            { date: '2025-11-24', time: '06:58:00', name: '沪电股份', subject: '券商观点|通信行业周报：AI创新引领算力突围', link: 'http://news.10jqka.com.cn/20251124/c672676438.shtml' },
+            { date: '2025-11-24', time: '07:00:00', name: '视觉中国', subject: '券商观点|计算机行业周报：Google引领全球AI产业前进', link: 'http://news.10jqka.com.cn/20251124/c672676458.shtml' },
+            { date: '2025-11-24', time: '09:05:00', name: '中文在线', subject: '11月21日13个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251124/c672679119.shtml' },
+            { date: '2025-11-24', time: '07:00:00', name: '中文在线', subject: '券商观点|计算机行业周报：Google引领全球AI产业前进', link: 'http://news.10jqka.com.cn/20251124/c672676458.shtml' },
+            { date: '2025-11-24', time: '08:50:00', name: '圣邦股份', subject: '以高可靠芯片，护航汽车安全：圣邦微电子荣获IATF 16949:2016符合证明函', link: 'http://news.10jqka.com.cn/20251124/c672678039.shtml' },
+            { date: '2025-11-24', time: '05:32:00', name: '汇顶科技', subject: '回购增持"进度条"频频刷新 上市公司纷纷出手稳预期', link: 'http://news.10jqka.com.cn/20251124/c672676019.shtml' },
+            { date: '2025-11-24', time: '07:07:00', name: '兆易创新', subject: '券商观点|电子行业周报：NV业绩强劲、谷歌发布Gemini3，算力景气度持续验证', link: 'http://news.10jqka.com.cn/20251124/c672676560.shtml' },
+            { date: '2025-11-24', time: '07:08:00', name: '天孚通信', subject: '券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力', link: 'http://news.10jqka.com.cn/20251124/c672676568.shtml' },
+            { date: '2025-11-24', time: '08:00:00', name: '中际旭创', subject: '最新！订单爆棚的公司名单来了，12家获机构扎堆关注', link: 'http://news.10jqka.com.cn/20251124/c672676937.shtml' },
+            { date: '2025-11-24', time: '06:58:00', name: '润建股份', subject: '券商观点|通信行业周报：AI创新引领算力突围', link: 'http://news.10jqka.com.cn/20251124/c672676438.shtml' },
+            { date: '2025-11-24', time: '06:58:00', name: '润建股份', subject: '校企协同！润建股份加速产学研合作，共绘中国-东盟AI农业新蓝图', link: 'http://news.10jqka.com.cn/20251124/c672676430.shtml' },
+            { date: '2025-11-24', time: '06:58:00', name: '润泽科技', subject: '券商观点|通信行业周报：AI创新引领算力突围', link: 'http://news.10jqka.com.cn/20251124/c672676438.shtml' },
+            { date: '2025-11-24', time: '07:08:00', name: '光环新网', subject: '券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力', link: 'http://news.10jqka.com.cn/20251124/c672676568.shtml' },
+            { date: '2025-11-24', time: '06:58:00', name: '光环新网', subject: '券商观点|通信行业周报：AI创新引领算力突围', link: 'http://news.10jqka.com.cn/20251124/c672676438.shtml' },
+            { date: '2025-11-24', time: '07:08:00', name: '奥飞数据', subject: '券商观点|通信行业周报：英伟达FY26Q3业绩超预期，谷歌发布Gemini 3和Nano Banana2，继续看好AI算力', link: 'http://news.10jqka.com.cn/20251124/c672676568.shtml' },
+            { date: '2025-11-24', time: '06:58:00', name: '奥飞数据', subject: '券商观点|通信行业周报：AI创新引领算力突围', link: 'http://news.10jqka.com.cn/20251124/c672676438.shtml' },
+            { date: '2025-11-24', time: '07:00:00', name: '数据港', subject: '券商观点|计算机行业周报：Google引领全球AI产业前进', link: 'http://news.10jqka.com.cn/20251124/c672676458.shtml' },
+            { date: '2025-11-24', time: '08:48:00', name: '兆易创新', subject: '2025年11月24日早间个股预警：安达智能股东易指通拟减持不超2.74%股份等', link: 'http://news.10jqka.com.cn/20251124/c672677983.shtml' },
+            { date: '2025-11-24', time: '09:05:00', name: '胜宏科技', subject: '11月21日13个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251124/c672679119.shtml' },
+            { date: '2025-11-24', time: '09:05:00', name: '东山精密', subject: '11月21日13个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251124/c672679119.shtml' },
+            { date: '2025-11-24', time: '08:41:00', name: '中兴通讯', subject: '上市公司纷纷抢位6G 诸多瓶颈待破', link: 'http://news.10jqka.com.cn/20251124/c672677832.shtml' },
+            { date: '2025-11-24', time: '09:05:00', name: '兆易创新', subject: '11月21日13个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251124/c672679119.shtml' },
+            { date: '2025-11-24', time: '09:05:00', name: '中际旭创', subject: '11月21日13个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251124/c672679119.shtml' },
+            { date: '2025-11-24', time: '09:05:00', name: '新易盛', subject: '11月21日13个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251124/c672679119.shtml' },
+            { date: '2025-11-24', time: '09:05:00', name: '赛微电子', subject: '11月21日13个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251124/c672679119.shtml' },
+            { date: '2025-11-24', time: '08:52:00', name: '长川科技', subject: '今日盘后生效，MSCI中国指数新纳26股！', link: 'http://news.10jqka.com.cn/20251124/c672678066.shtml' },
+            { date: '2025-11-25', time: '08:52:00', name: '视觉中国', subject: '算力之后，AI的价值洼地轮到谁了？', link: 'http://news.10jqka.com.cn/20251125/c672708172.shtml' },
+            { date: '2025-11-25', time: '05:47:00', name: '视觉中国', subject: '阿里千问引爆下载热潮 资金涌入AI应用板块', link: 'http://news.10jqka.com.cn/20251125/c672705264.shtml' },
+            { date: '2025-11-25', time: '07:24:00', name: '汇顶科技', subject: '多家上市公司回购增持刷新进度', link: 'http://news.10jqka.com.cn/20251125/c672706427.shtml' },
+            { date: '2025-11-25', time: '00:04:00', name: '汇顶科技', subject: '汇顶科技：关于以集中竞价交易方式首次回购公司股份的公告', link: 'http://news.10jqka.com.cn/field/sn/20251125/55013937.shtml' },
+            { date: '2025-11-25', time: '06:21:00', name: '豪威集团', subject: '新管理层助力豪威进一步提升运营效率', link: 'http://news.10jqka.com.cn/field/sr/20251125/55025263.shtml' },
+            { date: '2025-11-25', time: '05:47:00', name: '中贝通信', subject: '中贝通信李六兵：19亿元定增锚定AI未来', link: 'http://news.10jqka.com.cn/20251125/c672705275.shtml' },
+            { date: '2025-11-25', time: '05:47:00', name: '数据港', subject: '阿里千问引爆下载热潮 资金涌入AI应用板块', link: 'http://news.10jqka.com.cn/20251125/c672705264.shtml' },
+            { date: '2025-11-25', time: '00:02:00', name: '中际旭创', subject: '中际旭创：关于部分高级管理人员减持计划期限届满暨实施情况公告', link: 'http://news.10jqka.com.cn/field/sn/20251125/55021559.shtml' },
+            { date: '2025-11-25', time: '08:09:00', name: '天孚通信', subject: '天孚通信：光模块厂商是公司的主要客户', link: 'http://news.10jqka.com.cn/20251125/c672707098.shtml' },
+            { date: '2025-11-25', time: '00:30:00', name: '天孚通信', subject: '天孚通信（截止2025年11月20日）股东人数为141530户 环比增加10.55%', link: 'http://news.10jqka.com.cn/20251125/c672704663.shtml' },
+            { date: '2025-11-25', time: '08:19:00', name: '光迅科技', subject: '光迅科技：向特定对象发行股票申请获深交所受理', link: 'http://news.10jqka.com.cn/20251125/c672707501.shtml' },
+            { date: '2025-11-25', time: '00:02:00', name: '光迅科技', subject: '光迅科技：武汉光迅科技股份有限公司2025年度向特定对象发行股票募集说明书（申报稿）', link: 'http://news.10jqka.com.cn/field/sn/20251125/55025141.shtml' },
+            { date: '2025-11-25', time: '00:00:00', name: '光迅科技', subject: '光迅科技：武汉光迅科技股份有限公司最近一年的财务报告及其审计报告以及最近一期的财务报告', link: 'http://news.10jqka.com.cn/field/sn/20251125/55025143.shtml' },
+            { date: '2025-11-25', time: '00:00:00', name: '光迅科技', subject: '光迅科技：北京市嘉源律师事务所关于武汉光迅科技股份有限公司2025年度向特定对象发行股票的法律意见书', link: 'http://news.10jqka.com.cn/field/sn/20251125/55025139.shtml' },
+            { date: '2025-11-25', time: '00:00:00', name: '光迅科技', subject: '光迅科技：申万宏源证券承销保荐有限责任公司关于武汉光迅科技股份有限公司向特定对象发行股票并在主板上市之发行保荐书', link: 'http://news.10jqka.com.cn/field/sn/20251125/55025137.shtml' },
+            { date: '2025-11-25', time: '07:24:00', name: '烽火通信', subject: '多家上市公司回购增持刷新进度', link: 'http://news.10jqka.com.cn/20251125/c672706427.shtml' },
+            { date: '2025-11-25', time: '08:52:00', name: '昆仑万维', subject: '算力之后，AI的价值洼地轮到谁了？', link: 'http://news.10jqka.com.cn/20251125/c672708172.shtml' },
+            { date: '2025-11-25', time: '05:47:00', name: '昆仑万维', subject: '阿里千问引爆下载热潮 资金涌入AI应用板块', link: 'http://news.10jqka.com.cn/20251125/c672705264.shtml' },
+            { date: '2025-11-25', time: '08:52:00', name: '吉比特', subject: '算力之后，AI的价值洼地轮到谁了？', link: 'http://news.10jqka.com.cn/20251125/c672708172.shtml' },
+            { date: '2025-11-25', time: '18:18:00', name: '胜宏科技', subject: '回购超1亿元+股价回调！这些潜力股暗藏修复机会？', link: 'http://news.10jqka.com.cn/20251125/c672722584.shtml' },
+            { date: '2025-11-25', time: '16:29:00', name: '胜宏科技', subject: '多只电子、通信板块个股获大额资金流入', link: 'http://news.10jqka.com.cn/20251125/c672719780.shtml' },
+            { date: '2025-11-25', time: '11:33:00', name: '胜宏科技', subject: '直逼涨停！这只股最新股东户数骤降超三成', link: 'http://news.10jqka.com.cn/20251125/c672714696.shtml' },
+            { date: '2025-11-25', time: '09:54:00', name: '胜宏科技', subject: 'PCB概念震荡反弹 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712522.shtml' },
+            { date: '2025-11-25', time: '16:57:00', name: '鹏鼎控股', subject: '鹏鼎控股：积极推进与知名厂商的产品开发及认证', link: 'http://news.10jqka.com.cn/20251125/c672720464.shtml' },
+            { date: '2025-11-25', time: '09:54:00', name: '鹏鼎控股', subject: 'PCB概念震荡反弹 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712522.shtml' },
+            { date: '2025-11-25', time: '09:53:00', name: '鹏鼎控股', subject: '元件板块异动走高 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712454.shtml' },
+            { date: '2025-11-25', time: '16:29:00', name: '沪电股份', subject: '多只电子、通信板块个股获大额资金流入', link: 'http://news.10jqka.com.cn/20251125/c672719780.shtml' },
+            { date: '2025-11-25', time: '10:35:00', name: '沪电股份', subject: '海内外算力链利好共振 CPO、PCB板块大幅走强', link: 'http://news.10jqka.com.cn/20251125/c672713653.shtml' },
+            { date: '2025-11-25', time: '09:54:00', name: '沪电股份', subject: 'PCB概念震荡反弹 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712522.shtml' },
+            { date: '2025-11-25', time: '09:53:00', name: '沪电股份', subject: '元件板块异动走高 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712454.shtml' },
+            { date: '2025-11-25', time: '14:54:00', name: '生益科技', subject: '苏州生益："三步走"破解首批次新材料应用难题', link: 'http://news.10jqka.com.cn/20251125/c672716985.shtml' },
+            { date: '2025-11-25', time: '09:54:00', name: '生益科技', subject: 'PCB概念震荡反弹 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712522.shtml' },
+            { date: '2025-11-25', time: '09:54:00', name: '深南电路', subject: 'PCB概念震荡反弹 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712522.shtml' },
+            { date: '2025-11-25', time: '09:18:00', name: '深南电路', subject: '深南电路：11月24日持仓该股ETF资金净流入963.19万元，3日累计净流入1200.55万元', link: 'http://news.10jqka.com.cn/20251125/c672711424.shtml' },
+            { date: '2025-11-25', time: '11:33:00', name: '东山精密', subject: '直逼涨停！这只股最新股东户数骤降超三成', link: 'http://news.10jqka.com.cn/20251125/c672714696.shtml' },
+            { date: '2025-11-25', time: '09:53:00', name: '东山精密', subject: '元件板块异动走高 沪电股份涨停', link: 'http://news.10jqka.com.cn/20251125/c672712454.shtml' },
+            { date: '2025-11-25', time: '09:18:00', name: '东山精密', subject: '东山精密：11月24日持仓该股ETF资金净流入771.20万元，3日累计净流入1677.48万元', link: 'http://news.10jqka.com.cn/20251125/c672711436.shtml' },
+            { date: '2025-11-25', time: '05:47:00', name: '视觉中国', subject: '阿里千问引爆下载热潮 资金涌入AI应用板块', link: 'http://news.10jqka.com.cn/20251125/c672705264.shtml' },
+            { date: '2025-11-25', time: '21:15:00', name: '中文在线', subject: '电影《罗小黑战记2》转战线上热度不减，中文在线IP业务跑通了？', link: 'http://news.10jqka.com.cn/20251125/c672734306.shtml' },
+            { date: '2025-11-25', time: '15:00:00', name: '芒果超媒', subject: '中国银河证券：AI赋能与内容价值重估 把握高质量发展主线', link: 'http://news.10jqka.com.cn/20251125/c672717090.shtml' },
+            { date: '2025-11-25', time: '14:30:00', name: '芒果超媒', subject: '券商观点|2026年年度策略：核心资产筑安全边际，优质内容+AI应用燃增长引擎', link: 'http://news.10jqka.com.cn/20251125/c672716628.shtml' },
+            { date: '2025-11-25', time: '21:13:00', name: '圣邦股份', subject: '精准测量，创新引领：圣邦微电子SGM58201荣获"2025全球电子成就奖之年度创新产品奖"', link: 'http://news.10jqka.com.cn/20251125/c672734284.shtml' },
+            { date: '2025-11-25', time: '09:18:00', name: '圣邦股份', subject: '圣邦股份：11月24日持仓该股ETF资金净流入1003.61万元，3日累计净流入6247.50万元', link: 'http://news.10jqka.com.cn/20251125/c672711511.shtml' },
+            { date: '2025-11-25', time: '12:13:00', name: '汇顶科技', subject: '作业帮新一代学练机S50搭载汇顶科技组合方案', link: 'http://news.10jqka.com.cn/20251125/c672715111.shtml' },
+            { date: '2025-11-25', time: '07:24:00', name: '汇顶科技', subject: '多家上市公司回购增持刷新进度', link: 'http://news.10jqka.com.cn/20251125/c672706427.shtml' },
+            { date: '2025-11-25', time: '00:04:00', name: '汇顶科技', subject: '汇顶科技：关于以集中竞价交易方式首次回购公司股份的公告', link: 'http://news.10jqka.com.cn/field/sn/20251125/55013937.shtml' },
+            { date: '2025-11-25', time: '15:36:00', name: '上海贝岭', subject: '上海贝岭：公司与上海微电子无合作', link: 'http://news.10jqka.com.cn/20251125/c672717954.shtml' },
+            { date: '2025-11-25', time: '15:36:00', name: '上海贝岭', subject: '上海贝岭：截至目前公司没有吸收并购计划', link: 'http://news.10jqka.com.cn/20251125/c672717954.shtml' },
+            { date: '2025-11-25', time: '15:36:00', name: '上海贝岭', subject: '上海贝岭：截至2025年上半年，公司推出539款新产品', link: 'http://news.10jqka.com.cn/20251125/c672717941.shtml' },
+            { date: '2025-11-25', time: '15:36:00', name: '上海贝岭', subject: '上海贝岭：公司新推出的DDR5内存SPD芯片产品BL5118...', link: 'http://news.10jqka.com.cn/20251125/c672717832.shtml' },
+            { date: '2025-11-25', time: '06:21:00', name: '豪威集团', subject: '新管理层助力豪威进一步提升运营效率', link: 'http://news.10jqka.com.cn/field/sr/20251125/55025263.shtml' },
+            { date: '2025-11-25', time: '21:05:00', name: '兆易创新', subject: '兆易创新GD32G5系列荣膺2025全球电子成就奖"年度微控制器/接口产品"奖', link: 'http://news.10jqka.com.cn/20251125/c672734053.shtml' },
+            { date: '2025-11-25', time: '09:18:00', name: '兆易创新', subject: '兆易创新：11月24日持仓该股ETF资金净流入2784.89万元，3日累计净流入1.11亿元', link: 'http://news.10jqka.com.cn/20251125/c672711417.shtml' },
+            { date: '2025-11-25', time: '11:23:00', name: '瑞芯微', subject: '瑞芯微AIoT处理器RK3562获"中国芯"', link: 'http://news.10jqka.com.cn/20251125/c672714493.shtml' },
+            { date: '2025-11-25', time: '18:13:00', name: '普天科技', subject: '普天科技：产业投资基金有限责任公司持股比例降至5%以下', link: 'http://news.10jqka.com.cn/20251125/c672722493.shtml' },
+            { date: '2025-11-26', time: '00:04:00', name: '普天科技', subject: '普天科技：《简式权益变动报告书》（产业投资基金）', link: 'http://news.10jqka.com.cn/field/sn/20251126/55034215.shtml' },
+            { date: '2025-11-25', time: '18:59:00', name: '润建股份', subject: '润建股份筹划赴港上市事项', link: 'http://news.10jqka.com.cn/20251125/c672723518.shtml' },
+            { date: '2025-11-25', time: '18:46:00', name: '润建股份', subject: '润建股份：拟发行H股股票并在香港联交所上市', link: 'http://news.10jqka.com.cn/20251125/c672723119.shtml' },
+            { date: '2025-11-25', time: '18:05:00', name: '润建股份', subject: '产教融合！润建股份与广西职业师范学院共建产学研基地，共筑AI教育新生态', link: 'http://news.10jqka.com.cn/20251125/c672722225.shtml' },
+            { date: '2025-11-25', time: '15:23:00', name: '嘉环科技', subject: '嘉环科技与陕西三原共建双碳运营中心，携手擘画区域绿色高质量发展', link: 'http://news.10jqka.com.cn/20251125/c672717492.shtml' },
+            { date: '2025-11-25', time: '18:18:00', name: '润泽科技', subject: '回购超1亿元+股价回调！这些潜力股暗藏修复机会？', link: 'http://news.10jqka.com.cn/20251125/c672722584.shtml' },
+            { date: '2025-11-25', time: '20:31:00', name: '中际旭创', subject: '中际旭创接连被股东、高管减持', link: 'http://news.10jqka.com.cn/20251125/c672732478.shtml' },
+            { date: '2025-11-25', time: '13:10:00', name: '中际旭创', subject: '券商观点|电子行业周报：Google发布第三代旗舰人工智能模型Gemini 3', link: 'http://news.10jqka.com.cn/20251125/c672715580.shtml' },
+            { date: '2025-11-25', time: '11:33:00', name: '中际旭创', subject: '直逼涨停！这只股最新股东户数骤降超三成', link: 'http://news.10jqka.com.cn/20251125/c672714696.shtml' },
+            { date: '2025-11-25', time: '10:51:00', name: '中际旭创', subject: '新易盛、中际旭创狂拉6%，云计算ETF大涨3.26%！机构：AI叙事迈向奇点关键期', link: 'http://news.10jqka.com.cn/20251125/c672713929.shtml' },
+            { date: '2025-11-25', time: '11:33:00', name: '新易盛', subject: '直逼涨停！这只股最新股东户数骤降超三成', link: 'http://news.10jqka.com.cn/20251125/c672714696.shtml' },
+            { date: '2025-11-25', time: '10:54:00', name: '新易盛', subject: '中原证券通信行业2026年度策略：智启新质 算力互联破浪前行', link: 'http://news.10jqka.com.cn/20251125/c672713976.shtml' },
+            { date: '2025-11-25', time: '10:51:00', name: '新易盛', subject: '新易盛、中际旭创狂拉6%，云计算ETF大涨3.26%！机构：AI叙事迈向奇点关键期', link: 'http://news.10jqka.com.cn/20251125/c672713929.shtml' },
+            { date: '2025-11-25', time: '10:06:00', name: '新易盛', subject: 'CPO板块持续走强', link: 'http://news.10jqka.com.cn/20251125/c672712837.shtml' },
+            { date: '2025-11-25', time: '16:59:00', name: '中兴通讯', subject: '概念动态|中兴通讯新增"汽车芯片"概念', link: 'http://news.10jqka.com.cn/20251125/c672720509.shtml' },
+            { date: '2025-11-25', time: '16:05:00', name: '中兴通讯', subject: '中兴通讯午后涨超4% 自研车规级芯片"撼域"M1已搭载埃安旗下车型', link: 'http://news.10jqka.com.cn/20251125/c672719181.shtml' },
+            { date: '2025-11-25', time: '16:03:00', name: '中兴通讯', subject: '国产汽车全"芯"突破！中兴通讯"撼域"M1助力广汽驶入智能化快车道', link: 'http://news.10jqka.com.cn/20251125/c672719140.shtml' },
+            { date: '2025-11-25', time: '12:02:00', name: '中兴通讯', subject: '港股午评：恒生指数涨0.61%，恒生科技指数涨1.15%', link: 'http://news.10jqka.com.cn/20251125/c672715017.shtml' },
+            { date: '2025-11-25', time: '18:16:00', name: '天孚通信', subject: '天孚通信：控股股东天孚仁和转让301.1万股 总金额4.22亿元', link: 'http://news.10jqka.com.cn/20251125/c672722556.shtml' },
+            { date: '2025-11-25', time: '09:18:00', name: '天孚通信', subject: '天孚通信：11月24日持仓该股ETF资金净流入4043.10万元，3日累计净流入1.83亿元', link: 'http://news.10jqka.com.cn/20251125/c672711457.shtml' },
+            { date: '2025-11-25', time: '10:54:00', name: '光迅科技', subject: '中原证券通信行业2026年度策略：智启新质 算力互联破浪前行', link: 'http://news.10jqka.com.cn/20251125/c672713976.shtml' },
+            { date: '2025-11-25', time: '15:06:00', name: '烽火通信', subject: '概念动态|烽火通信新增"商业航天"概念', link: 'http://news.10jqka.com.cn/20251125/c672717180.shtml' },
+            { date: '2025-11-25', time: '12:18:00', name: '烽火通信', subject: '烽火通信旗下长江计算中标联通数科智算服务器集采项目', link: 'http://news.10jqka.com.cn/20251125/c672715153.shtml' },
+            { date: '2025-11-25', time: '12:11:00', name: '烽火通信', subject: '智算大单！烽火通信旗下长江计算赋能运营商算力升级', link: 'http://news.10jqka.com.cn/20251125/c672715093.shtml' },
+            { date: '2025-11-25', time: '11:58:00', name: '立昂微', subject: '广发证券：AI驱动电子行业景气持续上行 营收&利润同环比向上', link: 'http://news.10jqka.com.cn/20251125/c672714927.shtml' },
+            { date: '2025-11-26', time: '04:54:00', name: '胜宏科技', subject: 'A股年内累计回购超1300亿元 超百家实施公司股价翻倍', link: 'http://news.10jqka.com.cn/20251126/c672736330.shtml' },
+            { date: '2025-11-26', time: '05:14:00', name: '生益科技', subject: '"一键买入"泡泡玛特、老铺黄金，韩国巨头出手', link: 'http://news.10jqka.com.cn/20251126/c672736413.shtml' },
+            { date: '2025-11-26', time: '00:03:00', name: '上海贝岭', subject: '上海贝岭第九届董事会第二十二次会议决议公告', link: 'http://news.10jqka.com.cn/field/sn/20251126/55029547.shtml' },
+            { date: '2025-11-26', time: '00:03:00', name: '上海贝岭', subject: '上海贝岭关于召开2025年第二次临时股东会的通知', link: 'http://news.10jqka.com.cn/field/sn/20251126/55029551.shtml' },
+            { date: '2025-11-26', time: '00:02:00', name: '上海贝岭', subject: '上海贝岭关于选举非独立董事的公告', link: 'http://news.10jqka.com.cn/field/sn/20251126/55029549.shtml' },
+            { date: '2025-11-26', time: '00:00:00', name: '上海贝岭', subject: '上海贝岭董事会审计与风险控制委员会工作细则（第三版）', link: 'http://news.10jqka.com.cn/field/sn/20251126/55029535.shtml' },
+            { date: '2025-11-26', time: '05:14:00', name: '兆易创新', subject: '"一键买入"泡泡玛特、老铺黄金，韩国巨头出手', link: 'http://news.10jqka.com.cn/20251126/c672736413.shtml' },
+            { date: '2025-11-26', time: '04:54:00', name: '兆易创新', subject: 'AI应用推升存储芯片需求 行业高景气度或持续至明年年中', link: 'http://news.10jqka.com.cn/20251126/c672736331.shtml' },
+            { date: '2025-11-26', time: '00:04:00', name: '普天科技', subject: '《简式权益变动报告书》（产业投资基金）', link: 'http://news.10jqka.com.cn/field/sn/20251126/55034215.shtml' },
+            { date: '2025-11-26', time: '00:04:00', name: '普天科技', subject: '关于持股5%以上股东减持至5%以下的权益变动暨触及1%整数倍提示性公告', link: 'http://news.10jqka.com.cn/field/sn/20251126/55034213.shtml' },
+            { date: '2025-11-26', time: '00:03:00', name: '润建股份', subject: '关于筹划发行H股股票并在香港联合交易所有限公司上市的提示性公告', link: 'http://news.10jqka.com.cn/field/sn/20251126/55035331.shtml' },
+            { date: '2025-11-26', time: '08:33:00', name: '中际旭创', subject: '调整被视作"黄金坑"，这一超强板块卷土重来', link: 'http://news.10jqka.com.cn/20251126/c672738933.shtml' },
+            { date: '2025-11-26', time: '08:33:00', name: '新易盛', subject: '调整被视作"黄金坑"，这一超强板块卷土重来', link: 'http://news.10jqka.com.cn/20251126/c672738933.shtml' },
+            { date: '2025-11-26', time: '08:48:00', name: '天孚通信', subject: '2025年11月26日早间个股预警：天地数码拟4900万元转让天浩数码100%股权;紫燕食品股东拟合计减持不超0.67%股份', link: 'http://news.10jqka.com.cn/20251126/c672739178.shtml' },
+            { date: '2025-11-26', time: '08:33:00', name: '光迅科技', subject: '调整被视作"黄金坑"，这一超强板块卷土重来', link: 'http://news.10jqka.com.cn/20251126/c672738933.shtml' },
+            { date: '2025-11-26', time: '05:30:00', name: '国联股份', subject: '国联股份长三角数字经济总部启用', link: 'http://news.10jqka.com.cn/20251126/c672736434.shtml' },
+            { date: '2025-11-26', time: '22:15:00', name: '胜宏科技', subject: '中国新质生产力撞上澳洲产业风口：6家深市龙头圈粉海外长期资本', link: 'http://news.10jqka.com.cn/20251126/c672766417.shtml' },
+            { date: '2025-11-26', time: '21:42:00', name: '胜宏科技', subject: '深交所组织上市公司澳大利亚路演', link: 'http://news.10jqka.com.cn/20251126/c672766083.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '胜宏科技', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '15:58:00', name: '胜宏科技', subject: '"易中天"获大额资金流入', link: 'http://news.10jqka.com.cn/20251126/c672750077.shtml' },
+            { date: '2025-11-26', time: '10:43:00', name: '胜宏科技', subject: '全球AI PCB龙头厂商，深度拥抱GPU+ASIC头部客户', link: 'http://news.10jqka.com.cn/field/sr/20251126/55042999.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '沪电股份', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '15:58:00', name: '沪电股份', subject: '"易中天"获大额资金流入', link: 'http://news.10jqka.com.cn/20251126/c672750077.shtml' },
+            { date: '2025-11-26', time: '14:15:00', name: '沪电股份', subject: '沪电股份盘中再度触及涨停', link: 'http://news.10jqka.com.cn/20251126/c672747666.shtml' },
+            { date: '2025-11-26', time: '11:55:00', name: '沪电股份', subject: '沪电股份盘中涨停 产业链受益于谷歌发布新模型及TPU推新', link: 'http://news.10jqka.com.cn/20251126/c672746220.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '深南电路', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '东山精密', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '18:11:00', name: '东山精密', subject: 'CPO概念再爆发！长光华芯"两连板"，中际旭创市值破6000亿创新高，新易盛、源杰科技等多股跟涨', link: 'http://news.10jqka.com.cn/20251126/c672753716.shtml' },
+            { date: '2025-11-26', time: '15:55:00', name: '东山精密', subject: '我国启动卫星物联网业务商用试验 消费电子ETF收涨1.67%', link: 'http://news.10jqka.com.cn/20251126/c672749974.shtml' },
+            { date: '2025-11-26', time: '11:33:00', name: '东山精密', subject: '东山精密：基于商业保密原则，公司具体产品信息不便透露', link: 'http://news.10jqka.com.cn/20251126/c672745959.shtml' },
+            { date: '2025-11-27', time: '00:03:00', name: '视觉中国', subject: '视觉中国：2025年第二次临时股东会决议公告', link: 'http://news.10jqka.com.cn/field/sn/20251127/55047401.shtml' },
+            { date: '2025-11-27', time: '00:00:00', name: '视觉中国', subject: '视觉中国：2025年第二次临时股东会法律意见书', link: 'http://news.10jqka.com.cn/field/sn/20251127/55047413.shtml' },
+            { date: '2025-11-26', time: '15:51:00', name: '中文在线', subject: '中文在线：截至2025年6月30日参股公司CRAZY MAPLE STUDIO营业收入为27.6亿元', link: 'http://news.10jqka.com.cn/20251126/c672749798.shtml' },
+            { date: '2025-11-26', time: '15:51:00', name: '中文在线', subject: '中文在线：公司AI动漫业务线已实现对2D与3D多种视觉形态的全面覆盖', link: 'http://news.10jqka.com.cn/20251126/c672749797.shtml' },
+            { date: '2025-11-26', time: '15:51:00', name: '中文在线', subject: '中文在线：公司推出自研AI漫剧平台，实现了由AI驱动的优质内容生产', link: 'http://news.10jqka.com.cn/20251126/c672749786.shtml' },
+            { date: '2025-11-26', time: '17:45:00', name: '卓胜微', subject: '卓胜微：公司的射频前端分立器件和射频模组产品主要应用于智能手机等移动智能终端产品', link: 'http://news.10jqka.com.cn/20251126/c672753122.shtml' },
+            { date: '2025-11-26', time: '17:45:00', name: '卓胜微', subject: '卓胜微：公司向特定对象发行股票工作正在积极推进中', link: 'http://news.10jqka.com.cn/20251126/c672753119.shtml' },
+            { date: '2025-11-26', time: '17:45:00', name: '卓胜微', subject: '卓胜微：MAX-SAW已集成在滤波器模组中实现大规模出货', link: 'http://news.10jqka.com.cn/20251126/c672753114.shtml' },
+            { date: '2025-11-26', time: '19:12:00', name: '兆易创新', subject: '机构评级|长城证券给予兆易创新"增持"评级 未给出目标价', link: 'http://news.10jqka.com.cn/20251126/c672756320.shtml' },
+            { date: '2025-11-26', time: '09:27:00', name: '兆易创新', subject: '11月25日49个行业出现融资净买入，这些个股受融资客青睐！', link: 'http://news.10jqka.com.cn/20251126/c672743377.shtml' },
+            { date: '2025-11-26', time: '09:18:00', name: '兆易创新', subject: '兆易创新：11月25日持仓该股ETF资金净流出4365.02万元，3日累计净流入5220.03万元', link: 'http://news.10jqka.com.cn/20251126/c672743108.shtml' },
+            { date: '2025-11-26', time: '05:14:00', name: '兆易创新', subject: '"一键买入"泡泡玛特、老铺黄金，韩国巨头出手', link: 'http://news.10jqka.com.cn/20251126/c672736413.shtml' },
+            { date: '2025-11-26', time: '17:55:00', name: '兆易创新', subject: '25Q3扣非净利润环比大增55%，AI驱动存储周期上行', link: 'http://news.10jqka.com.cn/field/sr/20251126/55049587.shtml' },
+            { date: '2025-11-26', time: '18:39:00', name: '瑞芯微', subject: 'AI玩具撬动百亿市场，多方玩家分食"蛋糕"', link: 'http://news.10jqka.com.cn/20251126/c672754196.shtml' },
+            { date: '2025-11-26', time: '16:59:00', name: '瑞芯微', subject: '瑞芯微官网上线 RK182X 系列 AI 协处理器，内置小容量高带宽 DRAM', link: 'http://news.10jqka.com.cn/20251126/c672751782.shtml' },
+            { date: '2025-11-26', time: '15:55:00', name: '瑞芯微', subject: '我国启动卫星物联网业务商用试验 消费电子ETF收涨1.67%', link: 'http://news.10jqka.com.cn/20251126/c672749974.shtml' },
+            { date: '2025-11-26', time: '14:18:00', name: '瑞芯微', subject: '国产AI芯片形成"场景为王"优势 AI芯片板块延续涨势', link: 'http://news.10jqka.com.cn/20251126/c672747700.shtml' },
+            { date: '2025-11-26', time: '13:21:00', name: '普天科技', subject: '一度超百万手封涨停，002413量能爆了！商业航天迎大利好，高成长龙头曝光', link: 'http://news.10jqka.com.cn/20251126/c672747011.shtml' },
+            { date: '2025-11-26', time: '12:00:00', name: '中贝通信', subject: '中贝通信数字分身ByteMe上线试运行，赋能垂类行业大模型应用', link: 'http://news.10jqka.com.cn/20251126/c672746311.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '润建股份', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '17:48:00', name: '润建股份', subject: '润建股份受邀出席中国通信企业协会建设工程分会，共谋AI创新与高质量发展', link: 'http://news.10jqka.com.cn/20251126/c672753215.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '润泽科技', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '光环新网', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '奥飞数据', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '数据港', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '22:14:00', name: '梦网科技', subject: '荣信汇科科创板IPO获受理 控股股东左强曾任梦网科技高管', link: 'http://news.10jqka.com.cn/20251126/c672766410.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '中际旭创', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '18:41:00', name: '中际旭创', subject: '借谷歌AI算力东风，中际旭创市值突破6000亿', link: 'http://news.10jqka.com.cn/20251126/c672754278.shtml' },
+            { date: '2025-11-26', time: '18:11:00', name: '中际旭创', subject: 'CPO概念再爆发！长光华芯"两连板"，中际旭创市值破6000亿创新高，新易盛、源杰科技等多股跟涨', link: 'http://news.10jqka.com.cn/20251126/c672753716.shtml' },
+            { date: '2025-11-26', time: '18:00:00', name: '中际旭创', subject: '【概念细分】中际旭创(300308)新归类于共封装光学(CPO)-光模块细分方向', link: 'http://news.10jqka.com.cn/20251126/c672753481.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '新易盛', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '18:11:00', name: '新易盛', subject: 'CPO概念再爆发！长光华芯"两连板"，中际旭创市值破6000亿创新高，新易盛、源杰科技等多股跟涨', link: 'http://news.10jqka.com.cn/20251126/c672753716.shtml' },
+            { date: '2025-11-26', time: '15:58:00', name: '新易盛', subject: '"易中天"获大额资金流入', link: 'http://news.10jqka.com.cn/20251126/c672750077.shtml' },
+            { date: '2025-11-26', time: '14:12:00', name: '新易盛', subject: '光模块强势拉升！云计算ETF午后盘中涨超4%，中际旭创、新易盛领涨', link: 'http://news.10jqka.com.cn/20251126/c672747614.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '中兴通讯', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '15:04:00', name: '中兴通讯', subject: '中兴新支点操作系统 2025 答卷：向 AI 与 RISC-V 发起全面冲击', link: 'http://news.10jqka.com.cn/20251126/c672748485.shtml' },
+            { date: '2025-11-26', time: '11:02:00', name: '中兴通讯', subject: '医药股爆发，这些细分领域多股"20cm"涨停', link: 'http://news.10jqka.com.cn/20251126/c672745311.shtml' },
+            { date: '2025-11-26', time: '10:52:00', name: '中兴通讯', subject: '阿里云收入再创新高，南向资金加码港股科技龙头！港股通科技ETF招商冲击三连涨', link: 'http://news.10jqka.com.cn/20251126/c672745176.shtml' },
+            { date: '2025-11-26', time: '21:12:00', name: '天孚通信', subject: '天孚通信：合作伙伴属于公司保密信息', link: 'http://news.10jqka.com.cn/20251126/c672765509.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '天孚通信', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '19:09:00', name: '天孚通信', subject: '天孚通信：公司产品中包括了光隔离器和光学微透镜', link: 'http://news.10jqka.com.cn/20251126/c672755228.shtml' },
+            { date: '2025-11-26', time: '19:06:00', name: '天孚通信', subject: '天孚通信：公司定位光器件整体解决方案提供商和光电先进封装制造服务商，光模块厂商是公司的主要客户', link: 'http://news.10jqka.com.cn/20251126/c672755213.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '光迅科技', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '19:52:00', name: '烽火通信', subject: '券商观点|计算机点评报告：阿里巴巴-FY26Q2坚定AI投入，ToB/ToC齐发力', link: 'http://news.10jqka.com.cn/20251126/c672760931.shtml' },
+            { date: '2025-11-26', time: '16:24:00', name: '烽火通信', subject: '机构评级|国泰海通证券给予烽火通信"增持"评级', link: 'http://news.10jqka.com.cn/20251126/c672750897.shtml' },
+            { date: '2025-11-26', time: '11:25:00', name: '烽火通信', subject: '第一名！烽火通信空芯光纤中标', link: 'http://news.10jqka.com.cn/20251126/c672745787.shtml' },
+            { date: '2025-11-26', time: '16:05:00', name: '烽火通信', subject: '2025年三季报点评：Q3净利同比实现增长，光通信稳中有进', link: 'http://news.10jqka.com.cn/field/sr/20251126/55046213.shtml' },
+            { date: '2025-11-27', time: '00:01:00', name: '烽火通信', subject: '烽火通信：烽火通信科技股份有限公司关于变更持续督导保荐代表人的公告', link: 'http://news.10jqka.com.cn/field/sn/20251127/55045499.shtml' },
+            { date: '2025-11-26', time: '12:55:00', name: '立昂微', subject: '商业航天迎密集利好催化 高成长龙头曝光', link: 'http://news.10jqka.com.cn/20251126/c672746766.shtml' },
+            { date: '2025-11-27', time: '00:00:00', name: '立昂微', subject: '立昂微：立昂微2025年第一次临时股东大会会议资料', link: 'http://news.10jqka.com.cn/field/sn/20251127/55046399.shtml' },
+            { date: '2025-11-26', time: '15:44:00', name: '江丰电子', subject: '江丰电子携多项研发成果出席第二十二届中国国际半导体博览会', link: 'http://news.10jqka.com.cn/20251126/c672749618.shtml' },
+            { date: '2025-11-26', time: '11:02:00', name: '赛微电子', subject: '医药股爆发，这些细分领域多股"20cm"涨停', link: 'http://news.10jqka.com.cn/20251126/c672745311.shtml' },
+            { date: '2025-11-26', time: '09:55:00', name: '赛微电子', subject: '共封装光学(CPO)板块短线拉升', link: 'http://news.10jqka.com.cn/20251126/c672743983.shtml' },
+            { date: '2025-11-26', time: '12:05:00', name: '长川科技', subject: '存储芯片周涨幅最高超35%，半导体设备ETF盘中一度涨近2%，海光信息、寒武纪等走强', link: 'http://news.10jqka.com.cn/20251126/c672746361.shtml' },
+            { date: '2025-11-26', time: '15:04:00', name: '壹网壹创', subject: '概念动态|壹网壹创新增"人工智能"概念', link: 'http://news.10jqka.com.cn/20251126/c672748481.shtml' },
+            { date: '2025-11-26', time: '20:16:00', name: '昆仑万维', subject: '覆盖430家权威机构数据源，Skywork专业数据模式赋能高效AI生产力平台', link: 'http://news.10jqka.com.cn/20251126/c672762618.shtml' }
         ];
 
-        // 页面加载完成后执行
-        document.addEventListener('DOMContentLoaded', function() {
-            // 初始化页面
-            initPage();
-            
-            // 添加刷新按钮事件
-            document.getElementById('refreshBtn').addEventListener('click', function() {
-                refreshData();
-            });
-            
-            // 添加筛选器事件
-            document.getElementById('dateFilter').addEventListener('change', filterTable);
-            document.getElementById('stockFilter').addEventListener('change', filterTable);
+        // 获取唯一股票名称列表
+        const uniqueStocks = [...new Set(stockData.map(item => item.name))].sort();
+        
+        // 填充股票筛选下拉框
+        const stockFilter = document.getElementById('stockFilter');
+        uniqueStocks.forEach(stock => {
+            const option = document.createElement('option');
+            option.value = stock;
+            option.textContent = stock;
+            stockFilter.appendChild(option);
         });
 
-        // 初始化页面
-        function initPage() {
-            // 按股票名称和时间排序
-            stockData.sort((a, b) => {
+        // 排序函数：先按股票名称，再按日期和时间
+        function sortData(data) {
+            return data.sort((a, b) => {
                 if (a.name !== b.name) {
                     return a.name.localeCompare(b.name, 'zh-CN');
                 }
+                if (a.date !== b.date) {
+                    return a.date.localeCompare(b.date);
+                }
                 return a.time.localeCompare(b.time);
-            });
-            
-            // 填充筛选器选项
-            populateFilters();
-            
-            // 渲染表格
-            renderTable(stockData);
-            
-            // 更新最后刷新时间
-            updateLastUpdateTime();
-        }
-
-        // 填充筛选器选项
-        function populateFilters() {
-            const dateFilter = document.getElementById('dateFilter');
-            const stockFilter = document.getElementById('stockFilter');
-            
-            // 获取所有日期和股票名称
-            const dates = [...new Set(stockData.map(item => item.date))];
-            const stocks = [...new Set(stockData.map(item => item.name))];
-            
-            // 填充日期筛选器 - 按降序排列
-            dates.sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
-                const option = document.createElement('option');
-                option.value = date;
-                option.textContent = date;
-                dateFilter.appendChild(option);
-            });
-            
-            // 填充股票筛选器
-            stocks.sort().forEach(stock => {
-                const option = document.createElement('option');
-                option.value = stock;
-                option.textContent = stock;
-                stockFilter.appendChild(option);
             });
         }
 
@@ -445,66 +421,67 @@
             tableBody.innerHTML = '';
             
             if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" class="empty-message">没有找到匹配的数据</td></tr>';
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="5" class="no-data">没有找到匹配的数据</td>`;
+                tableBody.appendChild(row);
                 return;
             }
             
-            data.forEach(item => {
+            const sortedData = sortData(data);
+            
+            sortedData.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="date-col">${item.date}</td>
-                    <td class="time-col">${item.time}</td>
-                    <td class="name-col">${item.name}</td>
-                    <td class="topic-col">${item.topic}</td>
-                    <td class="link-col"><a href="${item.link}" target="_blank" class="link-btn">→</a></td>
+                    <td class="date">${item.date}</td>
+                    <td class="time">${item.time}</td>
+                    <td class="stock-name">${item.name}</td>
+                    <td class="subject">${item.subject}</td>
+                    <td><a href="${item.link}" target="_blank" class="link">查看</a></td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        // 筛选表格
-        function filterTable() {
-            const selectedDate = document.getElementById('dateFilter').value;
-            const selectedStock = document.getElementById('stockFilter').value;
+        // 应用筛选
+        function applyFilters() {
+            const dateFilter = document.getElementById('dateFilter').value;
+            const stockFilter = document.getElementById('stockFilter').value;
             
-            const filteredData = stockData.filter(item => {
-                const dateMatch = !selectedDate || item.date === selectedDate;
-                const stockMatch = !selectedStock || item.name === selectedStock;
-                return dateMatch && stockMatch;
-            });
+            let filteredData = stockData;
+            
+            if (dateFilter) {
+                filteredData = filteredData.filter(item => item.date === dateFilter);
+            }
+            
+            if (stockFilter) {
+                filteredData = filteredData.filter(item => item.name === stockFilter);
+            }
             
             renderTable(filteredData);
         }
 
-        // 刷新数据
-        function refreshData() {
-            // 在实际应用中，这里应该从API或服务器获取最新数据
-            // 这里我们只是模拟刷新
-            updateLastUpdateTime();
-            
-            // 显示刷新动画
-            const refreshBtn = document.getElementById('refreshBtn');
-            refreshBtn.style.transform = 'translateY(-50%) rotate(360deg)';
-            refreshBtn.style.transition = 'transform 0.5s';
-            
-            setTimeout(() => {
-                refreshBtn.style.transform = 'translateY(-50%) rotate(0deg)';
-            }, 500);
+        // 重置筛选
+        function resetFilters() {
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('stockFilter').value = '';
+            renderTable(stockData);
         }
 
-        // 更新最后刷新时间
-        function updateLastUpdateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleString('zh-CN', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            document.getElementById('lastUpdateTime').textContent = timeString;
+        // 模拟刷新数据（在实际应用中，这里应该从服务器获取新数据）
+        function refreshData() {
+            // 这里只是模拟，实际应用中应该从API获取新数据
+            // 为了演示，我们只是重新渲染当前数据
+            applyFilters();
+            alert('数据已刷新！');
         }
+
+        // 初始化表格
+        renderTable(stockData);
+
+        // 绑定事件
+        document.getElementById('applyFilters').addEventListener('click', applyFilters);
+        document.getElementById('resetFilters').addEventListener('click', resetFilters);
+        document.getElementById('refresh').addEventListener('click', refreshData);
     </script>
 </body>
 </html>
